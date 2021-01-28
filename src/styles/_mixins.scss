@@ -1,0 +1,57 @@
+@mixin transform($property) {
+    transform: $property;
+    -webkit-transform: $property;
+    -ms-transform: $property;
+    -moz-transform: $property;
+}
+@mixin noselect() {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+@mixin absolute() {
+    position: absolute;
+}
+@mixin defaultButton() {
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    font-family: 'plex';
+    padding: 1.5rem;
+    opacity: 0.25;
+    &:focus {
+        outline: none;
+    }
+    &:hover {
+        opacity: 1;
+    }
+}
+@mixin sizedBox($property) {
+    width: $property;
+    height: $property;
+}
+@mixin ambientglow() {
+    color: rgba(171, 171, 255, 0.7);
+    text-shadow: 0px 0px 5px rgba(171, 171, 255, 0.7);
+}
+@mixin accentglow() {
+    color: #ff4500AA;
+    text-shadow: 0px 0px 10px #ff4500AA;
+}
+@mixin fullScreen() {
+    width: 100vw;
+    height: 100vh;
+}
+@mixin setPosition($x, $y) {
+    left: $x;
+    top: $y;
+}
+@font-face {
+    font-family: 'plex';
+    src: url('./fonts/IBMPlexSans-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    src: url('./fonts/IBMPlexSans-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}

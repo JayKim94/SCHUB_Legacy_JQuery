@@ -1,0 +1,55 @@
+@keyframes flicker {
+    0% { transform: rotate(-1deg); }
+    20% { transform: rotate(2deg); }
+    40% { transform: rotate(-1deg); }
+    60% { transform: rotate(-1deg); }
+    80% { transform: rotate(-1deg); }
+    100% { transform: rotate(-1deg); }
+}
+#rocket_container {
+    left: 50%;
+    top: 50%;
+    img#rocket {
+        width: 125px;
+    }
+    .flame_wrapper {
+        @include setPosition(-110px, 40px);
+        position: absolute;
+        opacity: 0;
+        z-index: -1;
+        animation: flicker 3ms ease-in infinite;
+        .flame {
+            @include transform(rotateZ(-45deg));
+            transform-origin: center;
+            position: absolute;
+            bottom: 0;
+            border-radius: 0% 50% 50% 50%;
+        }
+        .red {
+            @include sizedBox(80px);
+            background-color: orangered;
+            box-shadow: 0px 0px 10px 5px orangered;
+        }
+        .orange {
+            @include sizedBox(60px);
+            left: 16px;
+            bottom: 10px;
+            background-color: orange;
+            box-shadow: 0px 0px 10px 5px orange;
+        }
+        .gold {
+            @include sizedBox(45px);
+            left: 28px;
+            bottom: 16px;
+            background-color: gold;
+            box-shadow: 0px 0px 10px 5px gold;
+        }
+        .white {
+            @include sizedBox(35px);
+            left: 36px;
+            bottom: 21px;
+            background-color: lightyellow;
+            box-shadow: 0px 0px 10px 5px lightyellow;
+        }
+    }
+}

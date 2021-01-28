@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, minimum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Grundschulspiel</title>
+</head>
+<body>
+    <canvas></canvas>
+    <div id="menu">
+        <h1>SCHUB!</h1>
+        <p>Entwickelt von Jawoon Kim</p>
+        <button id="start">START</button>
+        <button id="tutorial">TUTORIAL</button>
+    </div>
+    <div id="overlay_container">
+        <div id="countdown"></div>
+        <div id="score">0</div>
+        <div id="answer"></div>
+        <div id="rocket_container">
+            <img id="rocket" src="./img/rocket.svg"/>
+            <div class="flame_wrapper">
+                <div class="flame red"></div>
+                <div class="flame orange"></div>
+                <div class="flame gold"></div>
+                <div class="flame white"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
