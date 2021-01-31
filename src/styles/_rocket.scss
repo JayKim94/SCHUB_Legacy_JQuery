@@ -1,20 +1,67 @@
-@keyframes flicker {
-    0% { transform: rotate(-1deg); }
-    20% { transform: rotate(2deg); }
-    40% { transform: rotate(-1deg); }
-    60% { transform: rotate(-1deg); }
-    80% { transform: rotate(-1deg); }
-    100% { transform: rotate(-1deg); }
-}
+$flame_size: 80px;
 #rocket_container {
-    left: 50%;
-    top: 50%;
+    @include setPosition(-75px, 50%);
+    transition: transform 1500ms;
+    & > * {
+        @include absolute();
+    }
+    &.opening {
+        @include transform(rotate(-15deg));
+    }
     img#rocket {
         width: 125px;
     }
+    .smoke_wrapper {
+        @include setPosition(-110px, -30px);
+        z-index: -1;
+        .smoke {
+            @include setPosition(50%, 0);
+            @include transform(translateX(-50%));
+            margin: 0;
+            padding: 0;
+            & > li {
+                position: absolute;
+                list-style: none;
+                width: 60px;
+                height: 60px;
+                background-color: #575757;
+                border-radius: 50%;
+                opacity: 0;
+                &:nth-child(even) {
+                    animation: even 2800ms linear infinite;
+                }
+                &:nth-child(odd) {
+                    animation: odd 2800ms linear infinite;
+                }
+                &:nth-child(1) {
+                    animation-delay: 0s;
+                }
+                &:nth-child(2) {
+                    animation-delay: .8s;
+                }
+                &:nth-child(3) {
+                    animation-delay: 1.2s;
+                }
+                &:nth-child(4) {
+                    animation-delay: 2.4s;
+                }
+                &:nth-child(5) {
+                    animation-delay: 3.7s;
+                }
+                &:nth-child(6) {
+                    animation-delay: 4.5s;
+                }
+                &:nth-child(7) {
+                    animation-delay: 5.5s;
+                }
+                &:nth-child(8) {
+                    animation-delay: 6.0s;
+                }
+            }
+        }
+    }
     .flame_wrapper {
         @include setPosition(-110px, 40px);
-        position: absolute;
         opacity: 0;
         z-index: -1;
         animation: flicker 3ms ease-in infinite;
@@ -26,30 +73,46 @@
             border-radius: 0% 50% 50% 50%;
         }
         .red {
-            @include sizedBox(80px);
+            @include sizedBox($flame_size);
             background-color: orangered;
             box-shadow: 0px 0px 10px 5px orangered;
         }
         .orange {
-            @include sizedBox(60px);
+            @include sizedBox($flame_size * .75);
             left: 16px;
             bottom: 10px;
             background-color: orange;
             box-shadow: 0px 0px 10px 5px orange;
         }
         .gold {
-            @include sizedBox(45px);
+            @include sizedBox($flame_size * .55);
             left: 28px;
             bottom: 16px;
             background-color: gold;
             box-shadow: 0px 0px 10px 5px gold;
         }
         .white {
-            @include sizedBox(35px);
+            @include sizedBox($flame_size * .45);
             left: 36px;
             bottom: 21px;
             background-color: lightyellow;
             box-shadow: 0px 0px 10px 5px lightyellow;
         }
     }
+}
+@keyframes flicker {
+    0% { transform: rotate(-1deg); }
+    20% { transform: rotate(2deg); }
+    40% { transform: rotate(-1deg); }
+    60% { transform: rotate(-1deg); }
+    80% { transform: rotate(-1deg); }
+    100% { transform: rotate(-1deg); }
+}
+@keyframes even {
+    0% { @include filter(blur(5px)); @include transform(translate(0, 0) scale(1)); opacity: 1; }
+    100% { @include filter(blur(15px)); @include transform(translate(-350px, 100px) scale(3)); opacity: 0; }
+}
+@keyframes odd {
+    0% { @include filter(blur(5px)); @include transform(translate(0, 0) scale(1)); opacity: 1; }
+    100% { @include filter(blur(15px)); @include transform(translate(-350px, -100px) scale(3)); opacity: 0; }
 }

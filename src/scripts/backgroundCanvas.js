@@ -42,7 +42,8 @@ BackgroundCanvas.prototype.update = function() {
     this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
     // takes radians (360° = 2 * Math.PI)
     this.ctx.rotate(this.backgroundRotateRadians);
-    this.backgroundRotateRadians += this.rotateValue;
+    if (this.backgroundRotateRadians >= 2 * Math.PI) this.backgroundRotateRadians = 0;
+    if (this.backgroundRotateRadians >= 0) this.backgroundRotateRadians += this.rotateValue;
     // draw stars
     this.stars.forEach((star) => {
         if (star.x < -this.drawWidth) {
@@ -59,6 +60,12 @@ BackgroundCanvas.prototype.draw = function() {
         const star = new Star(this._getRandomStar());
         this.stars.push(star);
     };
+}
+BackgroundCanvas.prototype.resetRotation = function() {
+    this.rotateValue = -(this.rotateValue + 0.005);
+}
+BackgroundCanvas.prototype.setBackgroundAlpha = function(alpha) {
+    this.backgroundAlpha = alpha;
 }
 BackgroundCanvas.prototype._getRandomStar = function(x = random(-this.drawWidth, this.drawWidth)){
     return {

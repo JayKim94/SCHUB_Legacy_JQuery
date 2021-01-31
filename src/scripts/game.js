@@ -5,16 +5,10 @@
 // Jawoon Kim PBT3H19A
 import $ from 'jquery';
 
+import Animate from './animations.js';
 import globals from './globals.js';
 import { random } from './utils.js';
 import { Quiz } from './models/quiz.js';
-import { 
-    animate_clearedQuiz,
-    animate_currentQuiz, 
-    animate_startRocket, 
-    animate_floatRocket,
-    animate_numbers,
- } from './animations.js';
 
 //#region Constructor
 export function Game() {
@@ -24,17 +18,25 @@ export function Game() {
     this.init();
 }
 Game.prototype.init = function() {
+    const rocket = $('#rocket_container');
     this.score = 0;
     this.playPosY = innerHeight / 3;
     this.rocketSpeed = 0;
+    rocket.addClass('opening');
+    this.openingAnimation = Animate.openingRocket();
 }
 //#endregion
 //#region Methoden
 Game.prototype.start = function() {
     const rocket = $('#rocket_container');
-    const delay = 500;
+    const countdown = $('#countdown');
+    const score = $('#score');
+    const delay = 1000;
+    this.openingAnimation.pause();
+    rocket.removeClass('opening');
     // stop canvas rotation
-    globals.canvas.setRotationValue(0);
+    globals.canvas.resetRotation();
+    globals.canvas.setBackgroundAlpha(.55);
     // start the game
     this.isStarted = true;
     this.rocketSpeed += 5;
@@ -44,10 +46,8 @@ Game.prototype.start = function() {
         op2: random(1, 9) 
     });
     rocket.addClass('in_game');
-    animate_startRocket({ positionY: this.playPosY });
     // count-down
-    const countdown = $('#countdown');
-    const score = $('#score');
+    Animate.startRocket({ positionY: this.playPosY });
     setTimeout(() => {
         countdown.text('3').fadeIn();
     }, delay);
@@ -61,61 +61,62 @@ Game.prototype.start = function() {
         countdown.remove();
         score.animate({opacity: 1});
         globals.canvas.setVelocity({x: this.rocketSpeed});
-        animate_floatRocket();
-        this._update();
+        globals.canvas.setBackgroundAlpha(.95);
+        Animate.floatRocket();
+        this._next();
     }, delay * 4);
 }
 Game.prototype.submit = function() {
-    const answer = $('#answer');
-    const active = $('.active');
+    const field = $('#answer');
     if (this._isAnswerCorrect()) 
     {
+        field.text('');
         globals.canvas.setVelocity({ x: this.rocketSpeed });
+        Animate.hideSmoke();
+        Animate.showFlame({ opacity: 0.5, scale: 0.5 });
         this.rocketSpeed += 1;
         this.addScore(200);
-        // clears input
-        answer.text('');
-        // moves cleared quiz
-        active
-            .removeClass('active')
-            .addClass('cleared');
-        animate_clearedQuiz();
-        this.currentQuiz.next();
-        this._update();
+        this._next();
     } 
     else 
     {
-        answer.text('');
+        field.text('');
     }
 }
 Game.prototype.write = function(answer) {
+    const field = $('#answer');
     if (this._isAnswerReady()) 
     {
-        const field = $('#answer');
         field.append(answer)
     };
 }
 Game.prototype.addScore = function(score) {
     const prev = this.score;
-    const current = this.score + score;
+    const curr = this.score + score;
     this.score += score;
-    animate_numbers({ targets: '#score', prev, current });
+    Animate.countNumber({ targets: '#score', prev, curr });
 }
 //#endregion
 //#region Private
-Game.prototype._update = function() {
-    // gets Quiz data
-    const { op1, operator, op2 } = this.currentQuiz;
-    // loops materials
-    const classes = ['op1', 'operator', 'op2', 'eq'];
-    const targets = [op1.toString(), operator, op2.toString(), '='];
-    // adds to document
-    classes.map((name, index) => 
-        $(`<div class="op active ${name}"></div>`)
-            .attr('value', targets[index])
-            .text(targets[index])
-            .appendTo('#overlay_container'));
-    animate_currentQuiz();
+Game.prototype._next = function() {
+    const active = $('.active');
+    // mark as cleared
+    active
+        .removeClass('active')
+        .addClass('cleared');
+    Animate.clear();
+    // next quiz
+    this.currentQuiz.next();
+    this.currentQuiz.currentMap().forEach((val, key) => 
+    {
+        // append to overlay
+        $('<div class="op active"></div>')
+            .addClass(key)
+            .attr('value', val)
+            .text(val)
+            .appendTo('#overlay_container');
+    });
+    Animate.showActive();
 }
 Game.prototype._isAnswerReady = function() {
     return $('#answer').text().length < 2 && this.isReady;

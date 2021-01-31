@@ -1,6 +1,6 @@
 // globals.js
-// Globals enthält die globale Variablen
-// werden während der Laufzeit initialisiert
+// * Das Objekt enthält Instanzen, die von anderen Klassen zugegriffen werden. 
+// * wird während der Laufzeit initialisiert.
 
 // Jawoon Kim PBT3H19A
 export default {

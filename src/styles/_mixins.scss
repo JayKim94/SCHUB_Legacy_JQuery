@@ -9,6 +9,10 @@
     -webkit-user-select: none;
     -moz-user-select: none;
 }
+@mixin filter($property) {
+    filter: $property;
+    -webkit-filter: $property;
+}
 @mixin absolute() {
     position: absolute;
 }
