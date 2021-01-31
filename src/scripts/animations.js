@@ -6,7 +6,60 @@
 import anime from 'animejs/lib/anime.es.js';
 import globals from './globals';
 
-export default {
+export const AnimateRocket = {
+    flame: (rocketSpeed) => {
+        const ratio = rocketSpeed / (rocketSpeed + 100);
+        anime({
+            targets: '.flame_wrapper',
+            easing: 'easeOutExpo',
+            opacity: ratio,
+            duration: 500,
+        });
+    },
+    smoke: (opacity) => {
+        anime({
+            targets: '.smoke_wrapper',
+            easing: 'easeOutExpo',
+            opacity: opacity,
+            duration: 3000,
+        });
+    },
+    openingSequence: () => {
+        return anime({
+            targets: '.opening',
+            easing: 'linear',
+            left: '50%',
+            duration: 10000,
+        });
+    },
+    start: () => {
+        anime({
+            targets: '#rocket_container',
+            easing: 'easeOutExpo',
+            top: innerHeight / 3,
+            left: '50%',
+            duration: 3500,
+        });
+    },
+    float: (rocketSpeed) => {
+        const ratio = rocketSpeed / (rocketSpeed + 100);
+        const min = (innerHeight / 3) - (ratio * 60);
+        const max = (innerHeight / 3) + (ratio * 135);
+        anime({
+            targets: '#rocket_container',
+            easing: 'easeInOutExpo',
+            keyframes: [
+                { top: `${min}px` },
+                { top: `${max}px` },
+            ],
+            loop: true,
+            duration: 5000,
+            direction: 'alternate',
+        });
+    },
+}
+
+export const AnimateQuiz = {
     clear: () => {
         anime({
             targets: '.cleared',
@@ -24,7 +77,7 @@ export default {
             },
         });
     },
-    showActive: () => {
+    next: () => {
         anime({
             targets: '.op.active',
             easing: 'easeOutExpo',
@@ -49,58 +102,13 @@ export default {
             }
         });
     },
-    showFlame: ({opacity, scale}) => {
-        anime({
-            targets: '.flame_wrapper',
-            easing: 'easeOutExpo',
-            opacity: opacity,
-            scale: scale,
-            duration: 500,
-        });
-    },
-    hideSmoke: () => {
-        anime({
-            targets: '.smoke_wrapper',
-            easing: 'easeOutExpo',
-            opacity: 0,
-            duration: 300,
-        });
-    },
-    openingRocket: () => {
-        return anime({
-            targets: '.opening',
-            easing: 'linear',
-            left: '50%',
-            duration: 10000,
-        });
-    },
-    startRocket: ({positionY}) => {
-        anime({
-            targets: '#rocket_container',
-            easing: 'easeOutExpo',
-            top: positionY,
-            left: '50%',
-            duration: 3500,
-        });
-    },
-    floatRocket: () => {
-        anime({
-            targets: '#rocket_container',
-            easing: 'easeInOutQuad',
-            keyframes: [
-                { top: '-=65px' },
-                { top: '+=135px' },
-            ],
-            loop: true,
-            duration: 2500,
-            direction: 'alternate',
-        });
-    },
+}
+export const AnimateUI = {
     countNumber: ({targets, prev, curr}) => {
         anime({
             targets: targets,
             innerHTML: [prev, curr],
-            easing: 'easeInOutExpo',
+            easing: 'easeOutCirc',
             round: 1,
         });
     },

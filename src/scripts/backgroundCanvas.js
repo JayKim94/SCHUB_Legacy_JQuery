@@ -72,7 +72,7 @@ BackgroundCanvas.prototype._getRandomStar = function(x = random(-this.drawWidth,
         x,
         y: random(-this.drawHeight, this.drawHeight),
         radius: random(1, 3),
-        color: `rgba(${random(80, 275)}, 171, 255, ${random(.4, .7)})`,
+        color: `rgba(${random(80, 275)}, 171, 255, ${random(.25, .5)})`,
         ctx: this.ctx,
     };
 }

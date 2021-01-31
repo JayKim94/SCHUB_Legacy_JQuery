@@ -34,24 +34,41 @@ div#menu {
         @include setPosition(50%, 25%);
         color: whitesmoke;
         font-size: 13rem;
+        animation: fadeInFull 10000ms linear;
     }
     p {
         @include setPosition(50%, 37%);
         color: #f5f5f535;
         text-align: center;
         font-size: .9rem;
+        animation: fadeInFull 10000ms linear;
     }
-    button {
-        @include defaultButton();
-        font-size: $button_fontSize;
-        color: $button_primary;
-        &#start {
-            @include setPosition(50%, 65%);
-        }
-        &#tutorial {
-            @include setPosition(50%, 75%);
-        }
+}
+button {
+    @include defaultButton();
+    font-size: $button_fontSize;
+    color: $button_primary;
+    &#start {
+        @include setPosition(50%, 65%);
+        animation: fadeIn 1000ms linear;
     }
+    &#tutorial {
+        @include setPosition(50%, 75%);
+        animation: fadeIn 1000ms linear;
+    }
+    &#pause {
+        @include setPosition(90%, 10%);
+        font-size: 1rem;
+    }
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 0.25;}
+}
+@keyframes fadeInFull {
+    from {opacity: 0;}
+    to {opacity: 1;}
 }
 div#overlay_container {
     z-index: $layer_overlay;
@@ -62,8 +79,8 @@ div#overlay_container {
     div#score {
         @include setPosition(50%, 10%);
         font-size: 4rem;
-        opacity: 0;
-        color: $button_primary
+        display: none;
+        color: $button_primary;
     }
     div#countdown {
         @include ambientglow();
