@@ -35,7 +35,7 @@
     height: $property;
 }
 @mixin ambientglow() {
-    color: rgba(171, 171, 255, 0.7);
+    color: #ababffb3;
     text-shadow: 0px 0px 5px rgba(171, 171, 255, 0.7);
 }
 @mixin accentglow() {

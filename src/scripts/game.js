@@ -35,7 +35,7 @@ Game.prototype.start = function() {
     rocket.removeClass('opening');
     // stop canvas rotation
     globals.canvas.resetRotation();
-    globals.canvas.setBackgroundAlpha(.55);
+    globals.canvas.setBackgroundAlpha(0.35);
     // start the game
     this.isStarted = true;
     this.currentQuiz = new Quiz({ 
@@ -58,7 +58,6 @@ Game.prototype.start = function() {
     setTimeout(() => {
         countdown.remove();
         globals.canvas.setVelocity({x: this.rocketSpeed});
-        globals.canvas.setBackgroundAlpha(.95);
         this._next();
     }, delay * 4);
 }
@@ -70,10 +69,16 @@ Game.prototype.submit = function() {
     this.addSpeed(isCorrect);
     this.addScore(isCorrect);
     
-    $('#answer').text('');
+    if (!isCorrect) {
+        $('#answer').addClass('wrong');
+        AnimateUI.wrongAnswer();
+    }
+    else $('#answer').text('');
     
     // Animationen
-    globals.canvas.setVelocity({ x: this.rocketSpeed / 100 });
+    const backgroundVelocity = { x: this.rocketSpeed / 100, };
+    globals.canvas.setVelocity(backgroundVelocity);
+    
     AnimateRocket.float(this.rocketSpeed);
     AnimateRocket.flame(this.rocketSpeed);
     AnimateRocket.smoke(isCorrect ? 0 : .5);
@@ -88,19 +93,19 @@ Game.prototype.addScore = function(isCorrect) {
     const increment = isCorrect ? 10 * this.rocketSpeed : -500;
     const prev = this.score;
     const curr = (this.score + increment < 0) ? 0 : this.score + increment;
-
+    
     this.score = curr;
-
-    AnimateUI.countNumber({ targets: '#score', prev, curr });
+    
+    AnimateUI.count({ targets: '#score', prev, curr });
 }
 Game.prototype.addSpeed = function(isCorrect) {
     const increment = isCorrect ? random(70, 100) : -50;
     const prev = this.rocketSpeed;
     const curr = (this.rocketSpeed + increment < 0) ? 0 : this.rocketSpeed + increment;
-
+    
     this.rocketSpeed = curr;
     
-    AnimateUI.countNumber({ targets: '#speed', prev, curr });
+    AnimateUI.count({ targets: '#speed', prev, curr });
 }
 //#endregion
 //#region Private

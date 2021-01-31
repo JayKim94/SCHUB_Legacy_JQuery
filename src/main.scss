@@ -99,11 +99,15 @@ div#overlay_container {
         width: fit-content;
     }
     div#answer {
-        @include accentglow();
+        @include ambientglow();
         @include setPosition(50%, 60%);
         font-size: $fontSize_large;
         width: fit-content;
         text-align: center;
         background-color: transparent;
+        &.wrong {
+            @include accentglow();
+        }
     }
+    
 }

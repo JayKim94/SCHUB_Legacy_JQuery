@@ -104,12 +104,33 @@ export const AnimateQuiz = {
     },
 }
 export const AnimateUI = {
-    countNumber: ({targets, prev, curr}) => {
+    count: ({targets, prev, curr}) => {
+        const isNegative = (curr - prev < 0);
+
         anime({
             targets: targets,
+            color: isNegative ? ['#FF5555', '#FF5555', '#EFEFEF'] : '#EFEFEF',
             innerHTML: [prev, curr],
             easing: 'easeOutCirc',
             round: 1,
         });
     },
+    wrongAnswer: () => {
+        anime({
+            targets: '.wrong',
+            complete: function(anim) {
+                document.getElementById('answer').classList.remove('wrong');
+            },
+            keyframes: [
+                {left: '-=8px'},
+                {left: '+=8px'},
+                {left: '-=5px'},
+                {left: '+=5px'},
+                {left: '-=8px'},
+                {left: '+=8px'},
+            ],
+            loop: 3,
+            duration: 200,
+        });
+    }
 };
