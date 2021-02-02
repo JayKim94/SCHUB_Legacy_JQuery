@@ -5,10 +5,12 @@
 // Jawoon Kim PBT3H19A
 import anime from 'animejs/lib/anime.es.js';
 import globals from './globals';
+import { random } from './utils';
 
 export const AnimateRocket = {
-    flame: (rocketSpeed) => {
-        const ratio = rocketSpeed / (rocketSpeed + 100);
+    flame: () => {
+        const speed = globals.game.rocketSpeed;
+        const ratio = speed / (speed + 100);
         anime({
             targets: '.flame_wrapper',
             easing: 'easeOutExpo',
@@ -33,27 +35,36 @@ export const AnimateRocket = {
         });
     },
     start: () => {
+        const startingTop = innerHeight / 3;
         anime({
             targets: '#rocket_container',
             easing: 'easeOutExpo',
-            top: innerHeight / 3,
+            top: startingTop,
             left: '50%',
             duration: 3500,
         });
     },
-    float: (rocketSpeed) => {
-        const ratio = rocketSpeed / (rocketSpeed + 100);
-        const min = (innerHeight / 3) - (ratio * 60);
-        const max = (innerHeight / 3) + (ratio * 135);
+    float: () => {
+        const speed = globals.game.rocketSpeed;
+        const ratio = speed / (speed + 100);
+        const startingTop = innerHeight / 3;
         anime({
             targets: '#rocket_container',
-            easing: 'easeInOutExpo',
-            keyframes: [
-                { top: `${min}px` },
-                { top: `${max}px` },
+            easing: 'linear',
+            top: [
+                {value: `${startingTop - 20}px`, duration: 2500},
+                {value: `${startingTop + 100}px`, duration: 3700},
             ],
             loop: true,
-            duration: 5000,
+            direction: 'alternate',
+        });
+        anime({
+            targets: '#rocket_container',
+            left: [
+                {value: `45%`, duration: 2200, easing: 'linear'},
+                {value: `60%`, duration: 8300, easing: 'linear'},
+            ],
+            loop: true,
             direction: 'alternate',
         });
     },
@@ -63,11 +74,8 @@ export const AnimateQuiz = {
     clear: () => {
         anime({
             targets: '.cleared',
-            opacity: 0.2,
-            left: {
-                value: '-=350px',
-                duration: 250,
-            },
+            left: { value: '-=350px', duration: 150, easing: 'easeInCirc' },
+            opacity: { value: 0.1, duration: 500, easing: 'linear' },
             complete: function(anim) {
                 document.querySelectorAll('.cleared').forEach((element) => {
                     if (parseInt(element.style.left) < 0) {
@@ -80,8 +88,8 @@ export const AnimateQuiz = {
     next: () => {
         anime({
             targets: '.op.active',
-            easing: 'easeOutExpo',
-            duration: 1000,
+            easing: 'easeInExpo',
+            duration: 300,
             delay: function(el, i) {
                 return i * 150;
             },
@@ -93,16 +101,28 @@ export const AnimateQuiz = {
             left: {
                 value: function(el, i) {
                     const letterSpacing = 75;
-                    const xOffset = el.textContent.length < 2 ? 350 : 375;
+                    const xOffset = el.textContent.length < 2 ? 425 : 450;
                     return `-=${ xOffset - (letterSpacing * i) }px`
                 },
             },
+        });
+    },
+    drop: () => {
+        anime({
+            targets: '.cleared',
+            rotate: { value: random(30, 150), duration: 250, easing: 'linear' },
+            keyframes: [
+                { top: '-=30px', duration: 100, easing: 'linear' },
+                { top: (innerHeight + 300), duration: 400, easing: 'easeInCirc' }
+            ],
             complete: function(anim) {
-                globals.game.isReady = true;
-            }
+                const cleared = document.getElementsByClassName('cleared');
+                while (cleared.length > 0) cleared.item(0).remove();
+            },
         });
     },
 }
+
 export const AnimateUI = {
     count: ({targets, prev, curr}) => {
         const isNegative = (curr - prev < 0);
@@ -122,15 +142,15 @@ export const AnimateUI = {
                 document.getElementById('answer').classList.remove('wrong');
             },
             keyframes: [
-                {left: '-=8px'},
-                {left: '+=8px'},
-                {left: '-=5px'},
-                {left: '+=5px'},
-                {left: '-=8px'},
-                {left: '+=8px'},
+                {left: '-=10px'},
+                {left: '+=10px'},
+                {left: '-=7px'},
+                {left: '+=7px'},
+                {left: '-=12px'},
+                {left: '+=12px'},
             ],
             loop: 3,
             duration: 200,
         });
-    }
+    },
 };

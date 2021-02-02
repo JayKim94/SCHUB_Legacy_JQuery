@@ -1,9 +1,12 @@
 import { random } from '../utils.js';
 // Quiz data model
-export function Quiz({op1, op2, operator}) {
-    this.op1 = op1;
-    this.op2 = op2;
-    this.operator = operator;
+export function Quiz() {
+    this.init();
+}
+Quiz.prototype.init = function() {
+    this.op1 = random(1, 9);
+    this.op2 = random(1, 9);
+    this.operator = '+';
 }
 Quiz.prototype.answer = function() {
     let res;
@@ -14,26 +17,36 @@ Quiz.prototype.answer = function() {
         case '-':
             res = this.op1 - this.op2;
             break;
+        case '*':
+            res = this.op1 * this.op2;
+            break;
         default:
             res = undefined;
             break;             
     }
+    console.log(this.operator);
+    console.log(res);
     return res;
 }
 Quiz.prototype.next = function() {
     this.op1 = this.answer();
     this.op2 = random(1, 9);
     if (this.op1 > 30) {
-        if (Math.random() < .15) this.operator = '+';
+        const chanceForPlus = .15;
+        if (Math.random() < chanceForPlus) this.operator = '+';
         else this.operator = '-';
     }
     else if (this.op1 > 10) {
-        if (Math.random() < .55) this.operator = '+';
+        const chanceForPlus = .35;
+        if (Math.random() < chanceForPlus) this.operator = '+';
         else this.operator = '-';
     }
     else {
-        this.operator = '+';
+        const chanceForMulti = 1;
+        if (Math.random() < chanceForMulti) this.operator = '*';
+        else this.operator = '+';
     }
+    return this;
 }
 Quiz.prototype.currentMap = function() {
     return new Map([

@@ -13,6 +13,7 @@ export function BackgroundCanvas() {
     this.starsCount = 500;
     this.rotateValue = 0.0005;
     this.stars = [];
+    this.isResetting = false;
     this.init();
 }
 //#endregion
@@ -26,12 +27,15 @@ BackgroundCanvas.prototype.init = function() {
     this.drawHeight = (this.canvas.height + 1000) / 2;
     this.draw();
 }
+
 BackgroundCanvas.prototype.setVelocity = function({x}) {
-    this.stars.forEach(star => { star.velocity.x = x; });
+    this.stars.forEach(star => { star.velocity.x = (x / 100); });
 }
+
 BackgroundCanvas.prototype.setRotationValue = function(value) {
     this.rotateValue = value;
 }
+
 BackgroundCanvas.prototype.update = function() {
     // clears canvas
     this.ctx.fillStyle = `rgba(30, 30, 30, ${this.backgroundAlpha})`;
@@ -44,6 +48,9 @@ BackgroundCanvas.prototype.update = function() {
     this.ctx.rotate(this.backgroundRotateRadians);
     if (this.backgroundRotateRadians >= 2 * Math.PI) this.backgroundRotateRadians = 0;
     if (this.backgroundRotateRadians >= 0) this.backgroundRotateRadians += this.rotateValue;
+
+    if (this.isResetting) this.rotateValue *= 1.05;
+
     // draw stars
     this.stars.forEach((star) => {
         if (star.x < -this.drawWidth) {
@@ -52,8 +59,10 @@ BackgroundCanvas.prototype.update = function() {
             star.update();
         }
     });
+
     this.ctx.restore();
 }
+
 BackgroundCanvas.prototype.draw = function() {
     this.stars = [];
     for (let i = 0; i < this.starsCount; i++) {
@@ -61,18 +70,23 @@ BackgroundCanvas.prototype.draw = function() {
         this.stars.push(star);
     };
 }
+
 BackgroundCanvas.prototype.resetRotation = function() {
+    this.isResetting = true;
     this.rotateValue = -(this.rotateValue + 0.005);
 }
+
 BackgroundCanvas.prototype.setBackgroundAlpha = function(alpha) {
     this.backgroundAlpha = alpha;
 }
+
 BackgroundCanvas.prototype._getRandomStar = function(x = random(-this.drawWidth, this.drawWidth)){
+    const color = `rgba(${random(80, 275)}, 171, 255, ${random(.25, .5)})`;  
     return {
         x,
         y: random(-this.drawHeight, this.drawHeight),
         radius: random(1, 3),
-        color: `rgba(${random(80, 275)}, 171, 255, ${random(.25, .5)})`,
+        color,
         ctx: this.ctx,
     };
 }

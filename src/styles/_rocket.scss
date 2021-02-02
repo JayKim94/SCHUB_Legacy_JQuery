@@ -1,30 +1,26 @@
 $flame_size: 80px;
 #rocket_container {
-    @include setPosition(-75px, 50%);
+    @include setPosition(50%, 50%);
     transition: transform 1500ms;
     & > * {
         @include absolute();
     }
     &.opening {
+        @include setPosition(-75px, 50%);
         @include transform(rotate(-15deg));
     }
     img#rocket {
         width: 125px;
     }
     div.status {
-        @include setPosition(110px, -60px);
-        opacity: 0;
-        z-index: 10;
+        @include transform(translate(0, 0));
+        @include setPosition(80px, -40px);
         color: white;
+        font-size: 1rem;
+        opacity: .5;
+        animation: fadeIn 2000ms linear;
         span {
             position: relative;
-            @include setPosition(0, -40px);
-        }
-        .line {
-            @include absolute();
-            width: 1px;
-            height: 70px;
-            background-color: #EFEFEF;
         }
     }
     .smoke_wrapper {
@@ -115,20 +111,4 @@ $flame_size: 80px;
             box-shadow: 0px 0px 10px 5px lightyellow;
         }
     }
-}
-@keyframes flicker {
-    0% { transform: rotate(-1deg); }
-    20% { transform: rotate(2deg); }
-    40% { transform: rotate(-1deg); }
-    60% { transform: rotate(-1deg); }
-    80% { transform: rotate(-1deg); }
-    100% { transform: rotate(-1deg); }
-}
-@keyframes even {
-    0% { @include filter(blur(5px)); @include transform(translate(0, 0) scale(1)); opacity: 1; }
-    100% { @include filter(blur(15px)); @include transform(translate(-350px, 100px) scale(3)); opacity: 0; }
-}
-@keyframes odd {
-    0% { @include filter(blur(5px)); @include transform(translate(0, 0) scale(1)); opacity: 1; }
-    100% { @include filter(blur(15px)); @include transform(translate(-350px, -100px) scale(3)); opacity: 0; }
 }

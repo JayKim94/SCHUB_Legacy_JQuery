@@ -6,4 +6,5 @@
 export default {
     game: null,
     canvas: null,
+    ready: false,
 }
