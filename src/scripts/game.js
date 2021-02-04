@@ -22,6 +22,7 @@ Game.prototype.init = function() {
     this.rocketSpeed = 0;
     this.combo = 0;
     this.boostGauge = 0;
+    this.boostLevel = 1;
     this.openingAnimation = AnimateRocket.openingSequence();
     this.floatingAnimations = [];
 }
@@ -57,19 +58,22 @@ Game.prototype.continue = function() {
 Game.prototype.submit = function(playerAnswer) {
     // Spiellogik
     const isCorrect = (playerAnswer === this.currentQuiz.answer().toString());
-    const multiplier = Math.floor(this.rocketSpeed / 100);
     const basePoint = 100;
-    const bonusPoint = 50;
+    const bonusPoint = this.boostLevel * Math.floor(this.rocketSpeed / 100) * 50 + 50;
     const boostAmount = isCorrect ? (this.combo * 5 + 10) : 0;
-    const score = isCorrect ? multiplier * bonusPoint + basePoint : 0;
+    const score = isCorrect ? bonusPoint + basePoint : 0;
     const speed = isCorrect ? 100 : -20;
 
-    // Animation
+    // Animationen
+    /* Eingabefeld */
     if (isCorrect) $('.active').removeClass('active').addClass('cleared');
     else $('#answer').addClass('wrong');
-
-
-
+    /* Rocket */
+    if (this.floatingAnimations.length == 0)
+    {
+        this.floatingAnimations.push(AnimateRocket.float_vertical());
+        this.floatingAnimations.push(AnimateRocket.float_horizontal());
+    }
     AnimateRocket.flame();
     AnimateRocket.smoke(isCorrect ? 0 : .5);
     if (!isCorrect) { AnimateUI.wrongAnswer(); AnimateQuiz.drop(); }
@@ -96,6 +100,8 @@ Game.prototype.updateScore = function(score) {
 
     this.score = curr;
     
+    if (this.boostLevel > 1) $('#multiplier').text(`X ${this.boostLevel} BONUS!`);
+
     AnimateUI.addedScore(score);
     setTimeout(() => {
         AnimateUI.count({ 
@@ -124,6 +130,12 @@ Game.prototype.updateBoost = function(speed, boostAmount) {
     
     this.rocketSpeed += speed;
     this.boostGauge += boostAmount;
+
+    if (this.boostGauge >= 100) 
+    {
+        this.boostLevel++;
+        this.boostGauge -= 100;
+    }
     
     const _opacity = (this.boostGauge / 1000) + 0.05;
     $('.status').animate({opacity: _opacity});
@@ -163,8 +175,7 @@ Game.prototype._countdownSequence = function() {
         countdown.remove();
         $('#answer_field').fadeIn(1500);
 
-        this.floatingAnimations.push(AnimateRocket.float_vertical());
-        this.floatingAnimations.push(AnimateRocket.float_horizontal());
+        
         this._startTimer();
         
         AnimateQuiz.next();

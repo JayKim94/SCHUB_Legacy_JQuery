@@ -103,8 +103,12 @@ div#overlay_container {
         white-space: nowrap;
         span {
             position: relative;
+            &:last-child {
+                font-size: 2rem;
+            }
         }
     }
+
     div#answer_field {
         $neon_blue: #33CCFF !global;
         $neon_red: #ff0066 !global;
@@ -124,8 +128,7 @@ div#overlay_container {
             transform-origin: center;
             animation: rotateFull 2500ms linear infinite;
             border-radius: 50%;
-            background: radial-gradient(transparent, opacify($neon_blue, 0.3), opacify($neon_red, 0.3));
-            
+            background: radial-gradient(transparent, transparentize($neon_blue, 0.5), transparentize($neon_red, 0.5));
             &::after {
                 @include absolute();
                 $margin: 13px;
@@ -136,7 +139,7 @@ div#overlay_container {
                 left: $margin;
                 bottom: $margin;
                 border-radius: 50%;
-                background: radial-gradient($bg_color, opacify($bg_color, 0.3));
+                background: radial-gradient($bg_color, $bg_color, transparentize($bg_color, 0.5));
             }
             & span {
                 @include transform(translate(0, 0));
@@ -146,6 +149,7 @@ div#overlay_container {
                 background: linear-gradient($neon_blue, $neon_red);
                 border-radius: 50%;
                 transition: background 1300ms;
+                animation: pulse 5000ms linear infinite;
                 &:nth-child(1) {
                     filter: blur($blur_radius);
                 }
@@ -168,11 +172,26 @@ div#overlay_container {
         font-size: 3rem;
         color: $text_primary;
         animation: fadeInFull 2000ms linear;
+        #multiplier {
+            font-size: 1rem;
+            color: transparentize($primary_yellow, 0.8);
+            left: 5px;
+            line-height: 40px;
+        }
     }
-    div#added_score {
+
+    div.added_score {
         @include transform(translate(1px, 0));
-        color: $neon_blue;
-        font-size: 1.5rem;
+        color: $primary_yellow;
+        font-size: 2rem;
+        display: flex;
+        #increment { 
+            @include transform(translate(0, 0)); 
+            position: relative; 
+            &::before {
+                content: '+';
+            }
+        }
     }
 
     div#countdown {

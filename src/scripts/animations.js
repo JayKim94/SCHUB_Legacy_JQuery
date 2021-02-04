@@ -139,17 +139,9 @@ export const AnimateUI = {
     },
     addedScore: (score) => {
         anime({
-            targets: '#added_score',
-            innerHTML: [0, score],
-            duration: 500,
-            easing: 'linear',
-            round: 1,
-        });
-        anime({
-            targets: '#added_score',
-            delay: 1000,
-            innerHTML: [score, 0],
-            duration: 500,
+            targets: '#increment',
+            innerHTML: [30, score],
+            duration: 300,
             easing: 'linear',
             round: 1,
         });
@@ -167,7 +159,7 @@ export const AnimateUI = {
         anime({
             targets: '#answer',
             color: '#33CCFF',
-            fontSize: ['10rem', '8rem'],
+            fontSize: ['11rem', '8rem'],
             textShadow: [
                 "0px 0px 1px #33CCFF",
                 "0px 0px 15px #33CCFF",

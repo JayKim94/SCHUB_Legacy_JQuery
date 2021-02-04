@@ -31,7 +31,7 @@ UI.prototype._showIntroScreen = function() {
             .on('click', () => this._onClickStart()))
         .append(this._widget({ tag: 'button', id: 'tutorial' })
             .text('TUTORIAL')
-            .on('click', () => this._showDialog()))
+            .on('click', () => {}))
         .appendTo('body');
     // Rocket
     $('#rocket_container')
@@ -45,13 +45,17 @@ UI.prototype._showInGameScreen = function() {
     // Score
     this._widget({ tag: 'div', id: 'score' })
         .text('0')
+        .append()
         .appendTo('#overlay_container');
+    // Score Increment
     const bottom_score = $('#score').offset().top + $('#score').outerHeight(true);
     const left_score = $('#score').offset().left;
-    this._widget({ tag: 'div', id: 'added_score' })
+    this._widget({ tag: 'div', className: 'added_score' })
         .css({top: bottom_score, left: left_score})
+        .append(this._widget({ tag: 'span', id: 'increment' }))
         .appendTo('#overlay_container')
         .hide();
+
     // Timer
     this._widget({ tag: 'div', id: 'timer' })
         .append(this._widget({ tag: 'p', id: 'timer_num' }))
@@ -68,6 +72,7 @@ UI.prototype._showInGameScreen = function() {
     // Geschwindigkeit
     this._widget({ tag: 'div', className: 'status' })
         .append(this._widget({ tag: 'span', id: 'boost'}).text('0'))
+        .append(this._widget({ tag: 'span' }).text('%'))
         .css({opacity: 0})
         .appendTo('#overlay_container');
 }
@@ -131,15 +136,17 @@ UI.prototype._onSubmit = function() {
 
     if (isCorrect)
     {
+        const delayBetweenRounds = 300;
         /* Sperrt Events */
         globals.ready = false;
-        $('#added_score').fadeTo(1000, 0.5, () => { $('#added_score').fadeOut(1000); });
+        $('.added_score').fadeTo(50, 0.75);
         setTimeout(() => {
+            $('.added_score').fadeOut(300);
             this._appendNextQuiz();
             globals.game.animateToNextQuiz();
             /* Wird wieder freigegeben */
             globals.ready = true;
-        }, 300);
+        }, delayBetweenRounds);    
     }
     else 
     {

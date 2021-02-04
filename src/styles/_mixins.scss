@@ -61,15 +61,18 @@
     from {opacity: 0;}
     to {opacity: 0.5;}
 }
+
 @keyframes fadeInFull {
     from {opacity: 0;}
     to {opacity: 1;}
 }
+
 @keyframes correct {
     from { opacity: 1; text-shadow: 0px 0px 1px #33ccffCC; }
     20% { font-size: 10rem; }
     to { opacity: 0; font-size: 1rem; text-shadow: 0px 0px 20px #33ccffCC; }
 }
+
 @keyframes flicker {
     0% { transform: rotate(-2deg); }
     20% { transform: rotate(3deg); }
@@ -78,20 +81,33 @@
     80% { transform: rotate(-2deg); }
     100% { transform: rotate(2deg); }
 }
+
 @keyframes even {
     0% { @include filter(blur(5px)); @include transform(translate(0, 0) scale(1)); opacity: 1; }
     100% { @include filter(blur(15px)); @include transform(translate(-350px, 100px) scale(3)); opacity: 0; }
 }
+
 @keyframes odd {
     0% { @include filter(blur(5px)); @include transform(translate(0, 0) scale(1)); opacity: 1; }
     100% { @include filter(blur(15px)); @include transform(translate(-350px, -100px) scale(3)); opacity: 0; }
 }
+
 @keyframes shining_multi {
     from { text-shadow: 0px 0px 1px #FDF200AA; }
     50% { text-shadow: 0px 0px 20px #FDF200EE; }
     to { text-shadow: 0px 0px 1px #FDF200AA; }
 }
+
 @keyframes rotateFull {
-    from { @include transform(translate(-50%, -50%) rotate(0deg)); }
-    to { @include transform(translate(-50%, -50%) rotate(360deg)); }
+    from { @include transform(translate(-50%, -50%) rotate(0deg) scale(1.0)); }
+    50% { @include transform(translate(-50%, -50%) rotate(180deg) scale(1.05));}
+    to { @include transform(translate(-50%, -50%) rotate(360deg) scale(1.0)); }
+}
+
+@keyframes pulse {
+    0% { @include transform(translate(0, 0) scaleX(1.0) scaleY(1.0)); }
+    20% { @include transform(translate(0, 0) scaleX(0.95) scaleY(1.05)); }
+    40% { @include transform(translate(0, 0) scaleX(1.05) scaleY(0.9)); }
+    60% { @include transform(translate(0, 0) scaleX(1.0) scaleY(1.0)); }
+    100% { @include transform(translate(0, 0) scaleX(1.0) scaleY(1.0)); }
 }
