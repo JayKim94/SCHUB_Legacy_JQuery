@@ -11,30 +11,29 @@ import { Quiz } from './models/quiz.js';
 
 //#region Constructor
 export function Game() {
-    this.isReady = false;
     this.currentQuiz;
     this.init();
 }
 
 Game.prototype.init = function() {
+    this.isReady = false;
+    this.isPaused = false;
     this.score = 0;
     this.rocketSpeed = 0;
-    this.currentQuiz = new Quiz();
+    this.combo = 0;
+    this.boostGauge = 0;
     this.openingAnimation = AnimateRocket.openingSequence();
-
-
+    this.floatingAnimations = [];
 }
 //#endregion
 //#region Methoden
-Game.prototype.start = function() {
+Game.prototype.startGame = function() {
     this.openingAnimation.pause();
     this.timeLeft = 60;
     $('#timer_num').text(`${this.timeLeft}`);
     // Reset Rotation
     globals.canvas.resetRotation();
     globals.canvas.setBackgroundAlpha(0.55);
-
-    
     
     // Rocket
     AnimateRocket.start();
@@ -43,12 +42,25 @@ Game.prototype.start = function() {
     this._countdownSequence();
 }
 
-Game.prototype.submit = function() {
+Game.prototype.pause = function() {
+    this.isPaused = true;
+    this.floatingAnimations.forEach(anim => anim.pause());
+    globals.canvas.setVelocity({ x: 0 })
+}
+
+Game.prototype.continue = function() {
+    this.isPaused = false;
+    this.floatingAnimations.forEach(anim => anim.play());
+    globals.canvas.setVelocity({ x: this.rocketSpeed });
+}
+
+Game.prototype.submit = function(playerAnswer) {
     // Spiellogik
-    const isCorrect = this._isAnswerCorrect();
+    const isCorrect = (playerAnswer === this.currentQuiz.answer().toString());
     const multiplier = Math.floor(this.rocketSpeed / 100);
     const basePoint = 100;
     const bonusPoint = 50;
+    const boostAmount = isCorrect ? (this.combo * 5 + 10) : 0;
     const score = isCorrect ? multiplier * bonusPoint + basePoint : 0;
     const speed = isCorrect ? 100 : -20;
 
@@ -56,54 +68,81 @@ Game.prototype.submit = function() {
     if (isCorrect) $('.active').removeClass('active').addClass('cleared');
     else $('#answer').addClass('wrong');
 
-    AnimateUI.count({ 
-        targets: '#speed',
-        prev: this.rocketSpeed,
-        curr: this.rocketSpeed + speed });
-    AnimateUI.count({ 
-        targets: '#score', 
-        prev: this.score,
-        curr: this.score + score });
+
+
     AnimateRocket.flame();
     AnimateRocket.smoke(isCorrect ? 0 : .5);
-    if (!isCorrect) { AnimateUI.wrongAnswer(); AnimateQuiz.drop(); };
+    if (!isCorrect) { AnimateUI.wrongAnswer(); AnimateQuiz.drop(); }
+    else { AnimateUI.correctAnswer(); $('answer').text(''); }
 
     globals.canvas.setVelocity({ x: this.rocketSpeed + speed });
 
     // Aktualisierung
-    this.addScore(score);
-    this.addSpeed(speed);
-    if (isCorrect) this.currentQuiz.next();
-
+    this.updateCombo(isCorrect);
+    this.updateScore(score);
+    this.updateBoost(speed, boostAmount);
+    
     return isCorrect;
 }
 
-Game.prototype.next = function() {
+Game.prototype.animateToNextQuiz = function() {
     AnimateQuiz.clear();
     AnimateQuiz.next();
 }
 
-Game.prototype.write = function(answer) {
-    const field = $('#answer');
-    if (this._isAnswerReady()) field.append(answer)
-}
-
-Game.prototype.addScore = function(score) {
+Game.prototype.updateScore = function(score) {
     const prev = this.score;
     const curr = (this.score + score < 0) ? 0 : this.score + score;
-    
+
     this.score = curr;
-}
-
-Game.prototype.addSpeed = function(speed) {
-    const prev = this.rocketSpeed;
-    const curr = (this.rocketSpeed + speed < 0) ? 0 : this.rocketSpeed + speed;
     
-    this.rocketSpeed = curr;
+    AnimateUI.addedScore(score);
+    setTimeout(() => {
+        AnimateUI.count({ 
+            targets: '#score', 
+            prev,
+            curr,
+        });
+    }, 1000);
 }
 
-Game.prototype.getQuizMap = function() {
-    return this.currentQuiz?.currentMap();
+Game.prototype.updateCombo = function(isCorrect) {
+    if (isCorrect) this.combo++;
+    else this.combo = 0;
+
+    if (this.combo > 2) 
+    {
+        $('#combo').text(`${this.combo} COMBO!`)
+        if (this.combo == 5) $('#combo').addClass('over-five');
+        AnimateUI.combo();
+    }
+}
+
+Game.prototype.updateBoost = function(speed, boostAmount) {
+    const prev = this.boostGauge;
+    const curr = this.boostGauge + boostAmount;
+    
+    this.rocketSpeed += speed;
+    this.boostGauge += boostAmount;
+    
+    const _opacity = (this.boostGauge / 1000) + 0.05;
+    $('.status').animate({opacity: _opacity});
+
+    AnimateUI.count({ 
+        targets: '#boost',
+        prev,
+        curr,
+    });
+}
+
+Game.prototype.getNextQuizMap = function() {
+    if (this.currentQuiz != null) this.currentQuiz.next();
+    else 
+    {
+        this.currentQuiz = new Quiz();
+    }
+
+    return this.currentQuiz.currentMap();
 }
 //#endregion
 //#region Private
@@ -122,21 +161,24 @@ Game.prototype._countdownSequence = function() {
     }, delay * 3);
     setTimeout(() => {
         countdown.remove();
-        AnimateQuiz.next();
         $('#answer_field').fadeIn(1500);
-        AnimateRocket.float();
-        setInterval(() => {
-            this.timeLeft--;
-            $('#timer_num').text(`${this.timeLeft}`);
-        }, 1000);
+
+        this.floatingAnimations.push(AnimateRocket.float_vertical());
+        this.floatingAnimations.push(AnimateRocket.float_horizontal());
+        this._startTimer();
+        
+        AnimateQuiz.next();
+        globals.ready = true;
     }, delay * 4);
 }
 
-Game.prototype._isAnswerReady = function() {
-    return $('#answer').text().length < 2;
-}
+Game.prototype._startTimer = function() {
+    const tick = 1000;
+    setInterval(() => {
+        if (this.isPaused) return;
 
-Game.prototype._isAnswerCorrect = function() {
-    return $('#answer').text() === this.currentQuiz.answer().toString();
+        this.timeLeft--;
+        $('#timer_num').text(`${this.timeLeft}`);
+    }, tick);
 }
 //#endregion

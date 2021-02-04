@@ -44,11 +44,11 @@ export const AnimateRocket = {
             duration: 3500,
         });
     },
-    float: () => {
+    float_vertical: () => {
         const speed = globals.game.rocketSpeed;
         const ratio = speed / (speed + 100);
         const startingTop = innerHeight / 3;
-        anime({
+        return anime({
             targets: '#rocket_container',
             easing: 'linear',
             top: [
@@ -58,7 +58,9 @@ export const AnimateRocket = {
             loop: true,
             direction: 'alternate',
         });
-        anime({
+    },
+    float_horizontal: () => {
+        return anime({
             targets: '#rocket_container',
             left: [
                 {value: `45%`, duration: 2200, easing: 'linear'},
@@ -67,7 +69,7 @@ export const AnimateRocket = {
             loop: true,
             direction: 'alternate',
         });
-    },
+    }
 }
 
 export const AnimateQuiz = {
@@ -93,9 +95,9 @@ export const AnimateQuiz = {
             delay: function(el, i) {
                 return i * 150;
             },
-            opacity: .8,
+            opacity: {value: 0.75, duration: 200},
             fontSize: [
-                {value: '10rem', duration: 150},
+                {value: '2rem', duration: 150},
                 {value: '6rem'},
             ],
             left: {
@@ -133,6 +135,50 @@ export const AnimateUI = {
             innerHTML: [prev, curr],
             easing: 'easeOutCirc',
             round: 1,
+        });
+    },
+    addedScore: (score) => {
+        anime({
+            targets: '#added_score',
+            innerHTML: [0, score],
+            duration: 500,
+            easing: 'linear',
+            round: 1,
+        });
+        anime({
+            targets: '#added_score',
+            delay: 1000,
+            innerHTML: [score, 0],
+            duration: 500,
+            easing: 'linear',
+            round: 1,
+        });
+    },
+    combo: () => {
+        anime({
+            targets: '#combo',
+            top: ['-150px', '-180px'],
+            opacity: [.8, 0],
+            duration: 500,
+            easing: 'linear',
+        });
+    },
+    correctAnswer: () => {
+        anime({
+            targets: '#answer',
+            color: '#33CCFF',
+            fontSize: ['10rem', '8rem'],
+            textShadow: [
+                "0px 0px 1px #33CCFF",
+                "0px 0px 15px #33CCFF",
+            ],
+            duration: 300,
+            complete: function() {
+                document.getElementById('answer').innerText = '';
+                const style = document.getElementById('answer').style;
+                style.color = '';
+                style.textShadow = '';
+            }
         });
     },
     wrongAnswer: () => {

@@ -24,8 +24,6 @@ Quiz.prototype.answer = function() {
             res = undefined;
             break;             
     }
-    console.log(this.operator);
-    console.log(res);
     return res;
 }
 Quiz.prototype.next = function() {
