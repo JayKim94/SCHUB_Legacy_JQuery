@@ -45,7 +45,6 @@ UI.prototype._showInGameScreen = function() {
     // Score
     this._widget({ tag: 'div', id: 'score' })
         .text('0')
-        .append()
         .appendTo('#overlay_container');
     // Score Increment
     const bottom_score = $('#score').offset().top + $('#score').outerHeight(true);
@@ -53,9 +52,9 @@ UI.prototype._showInGameScreen = function() {
     this._widget({ tag: 'div', className: 'added_score' })
         .css({top: bottom_score, left: left_score})
         .append(this._widget({ tag: 'span', id: 'increment' }))
+        .append(this._widget({ tag: 'span', id: 'multiplier' }))
         .appendTo('#overlay_container')
         .hide();
-
     // Timer
     this._widget({ tag: 'div', id: 'timer' })
         .append(this._widget({ tag: 'p', id: 'timer_num' }))
@@ -71,9 +70,13 @@ UI.prototype._showInGameScreen = function() {
         .appendTo('#overlay_container');
     // Geschwindigkeit
     this._widget({ tag: 'div', className: 'status' })
-        .append(this._widget({ tag: 'span', id: 'boost'}).text('0'))
-        .append(this._widget({ tag: 'span' }).text('%'))
-        .css({opacity: 0})
+        .append(this._widget({ tag: 'p', id: 'boostGauge' })
+            .append(this._widget({ tag: 'span', id: 'boost'}).text('0'))
+            .append(this._widget({ tag: 'span', className: 'percent' }).text('%'))
+            .css({opacity: 0}))
+        .appendTo('#overlay_container');
+
+    this._widget({ tag: 'div', id: 'boostLevel' }).text('STUFE 1')
         .appendTo('#overlay_container');
 }
 
@@ -83,7 +86,7 @@ UI.prototype._showPausedScreen = function() {
         /* Sperrt Events */
         globals.ready = false;
         // blendet die Aufgabe aus
-        $('.active').addClass('blurred');
+        $('.op').addClass('blurred');
         // baut Pause-screen
         this._widget({ tag: 'div', id: 'dialog' })
             .append(this._widget({ tag: 'h1', className: 'title-text' })
@@ -94,7 +97,7 @@ UI.prototype._showPausedScreen = function() {
                     $('#dialog').remove();
                     this.isDialogOpen = false;
                     // setzt fort
-                    $('.active').removeClass('blurred');
+                    $('.op').removeClass('blurred');
                     globals.game.continue();
                     globals.ready = true;
                 }))
@@ -131,22 +134,21 @@ UI.prototype._onSubmit = function() {
 
     const playerAnswer = $('#answer').text();
     const isCorrect = globals.game.submit(playerAnswer);
-    const correctEffect = { fontSize: '12rem', opacity: 0 };
-    const reset = { fontSize: '8rem', opacity: 1 };
-
+    $('answer').text('');
+    
     if (isCorrect)
     {
-        const delayBetweenRounds = 300;
+        const delayBetweenRounds = 350;
         /* Sperrt Events */
         globals.ready = false;
-        $('.added_score').fadeTo(50, 0.75);
+        $('.added_score').fadeTo(25, 0.75);
         setTimeout(() => {
-            $('.added_score').fadeOut(300);
+            $('.added_score').fadeOut(500);
             this._appendNextQuiz();
             globals.game.animateToNextQuiz();
             /* Wird wieder freigegeben */
             globals.ready = true;
-        }, delayBetweenRounds);    
+        }, delayBetweenRounds);
     }
     else 
     {
@@ -175,6 +177,7 @@ UI.prototype._onKeyDown = function(e) {
     if (this._isValidToWrite(key)) 
     {
         $('#answer').append(key);
+        globals.game.hideBoost();
     }
     else if (this._isSubmit(key)) 
     {
@@ -182,9 +185,15 @@ UI.prototype._onKeyDown = function(e) {
     }
     else if (this._isClear(key)) 
     {
-        /* löscht die letzte Ziffer */
+        /*
+         * löscht die letzte Ziffer
+         */
         $('#answer').text((index, text) => 
             (text.length > 0) ? text.substr(0, text.length - 1) : text);
+        /*
+         * zeigt "Boost Gauge" an
+         */
+        if ($('#answer').text().length == 0) globals.game.showBoost();
     }
 }
 

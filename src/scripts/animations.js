@@ -128,7 +128,6 @@ export const AnimateQuiz = {
 export const AnimateUI = {
     count: ({targets, prev, curr}) => {
         const isNegative = (curr - prev < 0);
-
         anime({
             targets: targets,
             color: isNegative ? ['#FF5555', '#FF5555', '#EFEFEF'] : '#EFEFEF',
@@ -137,7 +136,7 @@ export const AnimateUI = {
             round: 1,
         });
     },
-    addedScore: (score) => {
+    increment: (score) => {
         anime({
             targets: '#increment',
             innerHTML: [30, score],
@@ -155,7 +154,22 @@ export const AnimateUI = {
             easing: 'linear',
         });
     },
-    correctAnswer: () => {
+    levelUp: () => {
+        anime({
+            targets: '#boostLevel',
+            fontSize: ['1.5rem', '2.5rem', '1.5rem'],
+            color: ['#F5F5F5', '#FDF200', '#F5F5F5'],
+            opacity: [0.25, 1, 0.25],
+            textShadow: [
+                "0px 0px 0px #FDF200",
+                "0px 0px 15px #FDF200",
+                "0px 0px 0px #FDF200",
+            ],
+            duration: 3000,
+            easing: 'easeOutCirc',
+        });
+    },
+    correct: () => {
         anime({
             targets: '#answer',
             color: '#33CCFF',
@@ -173,7 +187,7 @@ export const AnimateUI = {
             }
         });
     },
-    wrongAnswer: () => {
+    wrong: () => {
         anime({
             targets: '.wrong',
             complete: function(anim) {
