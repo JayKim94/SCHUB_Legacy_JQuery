@@ -3,20 +3,24 @@
 div#overlay_container {
     z-index: 10;
     color: $text_primary;
+
     & * {
         @include absolute();
         @include transform(translate(-50%, -50%));
     }
+
     /* UI (statisch) */
     div.status {
-        @include setPosition(50%, 70%);
+        @include setPosition(50%, 65%);
         z-index: 20;
         white-space: nowrap;
+
         & * {
             @include transform(translate(0, 0));
             position: relative;
             text-align: center;
         }
+
         p#boostGauge {
             span#boost {
                 font-size: 6rem;
@@ -26,15 +30,57 @@ div#overlay_container {
             }
         }
     }
+
     div#boostLevel {
-        @include setPosition(50%, 90%);
-        font-size: 1.5rem;
-        opacity: .25;
+        @include setPosition(50%, 88%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap;
+        & > * {
+            @include transform(translate(0, 0));
+            position: relative;
+        }
+        
+        #levelText {
+            @include setPosition(0, 50%);
+            font-size: 1.5rem;
+            opacity: .45;
+        }
+
+        #currentSpeed {
+            @include glow($neon_red);
+            font-size: 1.25rem;
+            opacity: .75;
+            &::after {
+                content: '.0km/s';
+            }
+        }
+    }
+
+    div#answer {
+        @include glow($text_primary);
+        @include setPosition(50%, 65%);
+        font-size: 8rem;
+        width: fit-content;
+        text-align: center;
+        background-color: transparent;
+        opacity: 1;
+
+        &.wrong {
+            @include glow($primary_red);
+        }
+
+        &.correct {
+            @include glow($neon_blue);
+        }
     }
 
     div#answer_field {
-        @include setPosition(50%, 70%);
+        @include setPosition(50%, 65%);
         display: none;
+
         #combo {
             @include absolute();
             color: $text_primary;
@@ -45,6 +91,7 @@ div#overlay_container {
             &.over-five { @include glow($neon_blue); }
             &.over-twenty { @include glow($neon_red); }
         }
+
         #circle {
             @include sizedBox(250px);
             transform-origin: center;
@@ -63,6 +110,7 @@ div#overlay_container {
                 border-radius: 50%;
                 background: radial-gradient($bg_color, $bg_color, transparentize($bg_color, 0.5));
             }
+
             & span {
                 @include transform(translate(0, 0));
                 $blur_radius: 5px;
@@ -105,11 +153,13 @@ div#overlay_container {
             position: relative;
             @include transform(translate(0, 0)); 
         }
+        
         #increment { 
             &::before {
                 content: '+';
             }
         }
+
         #multiplier {
             font-size: 1rem;
             color: transparentize($primary_pink, 0.1);
@@ -142,23 +192,7 @@ div#overlay_container {
         }
     }
 
-    div#answer {
-        @include glow($text_primary);
-        @include setPosition(50%, 70%);
-        font-size: 8rem;
-        width: fit-content;
-        text-align: center;
-        background-color: transparent;
-        opacity: 1;
 
-        &.wrong {
-            @include glow($primary_red);
-        }
-
-        &.correct {
-            @include glow($neon_blue);
-        }
-    }
 
 
 }

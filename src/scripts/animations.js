@@ -35,7 +35,10 @@ export const AnimateRocket = {
         });
     },
     start: () => {
+        const rocket = document.getElementById('rocket_container');
         const startingTop = innerHeight / 3;
+        rocket.classList.remove('opening');
+        rocket.classList.add('in_game');
         anime({
             targets: '#rocket_container',
             easing: 'easeOutExpo',
@@ -45,8 +48,6 @@ export const AnimateRocket = {
         });
     },
     float_vertical: () => {
-        const speed = globals.game.rocketSpeed;
-        const ratio = speed / (speed + 100);
         const startingTop = innerHeight / 3;
         return anime({
             targets: '#rocket_container',
@@ -74,6 +75,10 @@ export const AnimateRocket = {
 
 export const AnimateQuiz = {
     clear: () => {
+        document.querySelectorAll('.active').forEach((el) => {
+            el.classList.remove('active');
+            el.classList.add('cleared');
+        });
         anime({
             targets: '.cleared',
             left: { value: '-=350px', duration: 150, easing: 'easeInCirc' },
@@ -88,6 +93,9 @@ export const AnimateQuiz = {
         });
     },
     next: () => {
+        document.querySelectorAll('.op:not(.cleared)').forEach((el) => {
+            el.classList.add('active');
+        });
         anime({
             targets: '.op.active',
             easing: 'easeInExpo',
@@ -126,12 +134,31 @@ export const AnimateQuiz = {
 }
 
 export const AnimateUI = {
-    count: ({targets, prev, curr}) => {
+    score: ({prev, curr}) => {
+        anime({
+            targets: '#score',
+            delay: 1000,
+            color: '#EFEFEF',
+            innerHTML: [prev, curr],
+            easing: 'easeOutCirc',
+            round: 1,
+        });
+    },
+    count: ({targets, prev, curr, round = 1}) => {
         const isNegative = (curr - prev < 0);
         anime({
             targets: targets,
             color: isNegative ? ['#FF5555', '#FF5555', '#EFEFEF'] : '#EFEFEF',
             innerHTML: [prev, curr],
+            easing: 'easeOutCirc',
+            round,
+        });
+    },
+    speedUp: ({prev, curr}) => {
+        anime({
+            targets: '#currentSpeed',
+            innerHTML: [prev, curr],
+            duration: 1500,
             easing: 'easeOutCirc',
             round: 1,
         });
@@ -139,7 +166,7 @@ export const AnimateUI = {
     increment: (score) => {
         anime({
             targets: '#increment',
-            innerHTML: [30, score],
+            innerHTML: [0, score],
             duration: 300,
             easing: 'linear',
             round: 1,
@@ -156,16 +183,16 @@ export const AnimateUI = {
     },
     levelUp: () => {
         anime({
-            targets: '#boostLevel',
+            targets: '#levelText',
             fontSize: ['1.5rem', '2.5rem', '1.5rem'],
             color: ['#F5F5F5', '#FDF200', '#F5F5F5'],
             opacity: [0.25, 1, 0.25],
             textShadow: [
-                "0px 0px 0px #FDF200",
+                "0px 0px 0px #EFEFEF",
                 "0px 0px 15px #FDF200",
-                "0px 0px 0px #FDF200",
+                "0px 0px 0px #EFEFEF",
             ],
-            duration: 3000,
+            duration: 1500,
             easing: 'easeOutCirc',
         });
     },
@@ -180,14 +207,15 @@ export const AnimateUI = {
             ],
             duration: 300,
             complete: function() {
-                document.getElementById('answer').innerText = '';
-                const style = document.getElementById('answer').style;
-                style.color = '';
-                style.textShadow = '';
+                const answer = document.getElementById('answer');
+                answer.innerText = '';
+                answer.style.color = '';
+                answer.style.textShadow = '';
             }
         });
     },
     wrong: () => {
+        document.getElementById('answer').classList.add('wrong');
         anime({
             targets: '.wrong',
             complete: function(anim) {

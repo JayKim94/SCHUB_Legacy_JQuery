@@ -22,7 +22,9 @@ UI.prototype.init = function() {
 //#region Screen Switches
 
 UI.prototype._showIntroScreen = function() {
-    // Menu
+    /*
+     * Startmenü mit Titel
+     */
     this._widget({ tag: 'div', id: 'menu' })
         .append(this._widget({ tag: 'h1' }).text('SCHUB!'))
         .append(this._widget({ tag: 'p' }).text('Entwickelt von Jawoon Kim'))
@@ -33,20 +35,31 @@ UI.prototype._showIntroScreen = function() {
             .text('TUTORIAL')
             .on('click', () => {}))
         .appendTo('body');
-    // Rocket
-    $('#rocket_container')
-        .addClass('opening');
+    /*
+     * Rocket SVG + Flamme + Rauch
+     */
+    this._widget({ tag: 'div', id: 'rocket_container'})
+        .append(this._widget({ tag: 'img', id: 'rocket' })
+            .attr('src', 'img/rocket.svg')
+            .attr('alt', 'rocket'))
+        .append(this._widget({ tag: 'div', className: 'flame_wrapper' })
+            .append(this._widget({ tag:'div', className: 'flame red' }))
+            .append(this._widget({ tag:'div', className: 'flame orange' }))
+            .append(this._widget({ tag:'div', className: 'flame gold' }))
+            .append(this._widget({ tag:'div', className: 'flame white' })))
+        .append(this._widget({ tag: 'div', className: 'smoke_wrapper' })
+            .append(this._buildSmoke()))
+        .addClass('opening')
+        .appendTo('#overlay_container');
 }
 
 UI.prototype._showInGameScreen = function() {
-    // Countdown (wird nach dem Start entfernt)
-    this._widget({ tag: 'div', id: 'countdown' })
-        .appendTo('#overlay_container');
-    // Score
+    /*
+     * Punktzahl (oben links)
+     */
     this._widget({ tag: 'div', id: 'score' })
         .text('0')
         .appendTo('#overlay_container');
-    // Score Increment
     const bottom_score = $('#score').offset().top + $('#score').outerHeight(true);
     const left_score = $('#score').offset().left;
     this._widget({ tag: 'div', className: 'added_score' })
@@ -55,28 +68,46 @@ UI.prototype._showInGameScreen = function() {
         .append(this._widget({ tag: 'span', id: 'multiplier' }))
         .appendTo('#overlay_container')
         .hide();
-    // Timer
+    /*
+     * Timer (oben mitte)
+     */
     this._widget({ tag: 'div', id: 'timer' })
         .append(this._widget({ tag: 'p', id: 'timer_num' }))
         .append(this._widget({ tag: 'p', id: 'timer_tag' }).text('Verbleibende Zeit'))
         .appendTo('#overlay_container');
-    // Eingabefeld
-    this._widget({ tag: 'div', id: 'answer' })
-        .appendTo('#overlay_container');
-    // Pause
+    /*
+     * Pause (oben rechts)
+     */
     this._widget({tag: 'button', id: 'pause' })
         .text('PAUSE')
         .on('click', (e) => this._onClickPause())
         .appendTo('#overlay_container');
-    // Geschwindigkeit
+    /*
+     * Eingabefeld (mitte)
+     */
+    this._widget({ tag: 'div', id: 'answer_field'})
+        .append(this._widget({ tag: 'span', id: 'combo' }))
+        .append(this._widget({ tag: 'div', id: 'circle' })
+            .append(this._widget({ tag: 'span' }))
+            .append(this._widget({ tag: 'span' }))
+            .append(this._widget({ tag: 'span' }))
+            .append(this._widget({ tag: 'span' })))
+        .appendTo('#overlay_container');
+    this._widget({ tag: 'div', id: 'answer' })
+        .appendTo('#overlay_container');
+    /*
+     * Status (unten mitte)
+     */
     this._widget({ tag: 'div', className: 'status' })
         .append(this._widget({ tag: 'p', id: 'boostGauge' })
             .append(this._widget({ tag: 'span', id: 'boost'}).text('0'))
             .append(this._widget({ tag: 'span', className: 'percent' }).text('%'))
             .css({opacity: 0}))
         .appendTo('#overlay_container');
-
-    this._widget({ tag: 'div', id: 'boostLevel' }).text('STUFE 1')
+    this._widget({ tag: 'div', id: 'boostLevel' })
+        .append(this._widget({ tag: 'div', id: 'levelText' }).text('STUFE 1'))
+        .append(this._widget({ tag: 'div', id: 'currentSpeed' })
+            .text('0'))
         .appendTo('#overlay_container');
 }
 
@@ -121,10 +152,11 @@ UI.prototype._onClickPause = function() {
 }
 
 UI.prototype._onClickStart = function() {
-    $(document).on('keydown', (e) => this._onKeyDown(e));
-    $('#menu').fadeOut(() => $('#menu').remove());
-    $('#rocket_container').removeClass('opening').addClass('in_game');
     this._showInGameScreen();
+    $('#menu').fadeOut(() => $('#menu').remove());
+    $(document).on('keydown', (e) => this._onKeyDown(e));
+    this._widget({ tag: 'div', id: 'countdown' })
+        .appendTo('#overlay_container');
     this._appendNextQuiz();
     globals.game.startGame();
 }
@@ -134,21 +166,12 @@ UI.prototype._onSubmit = function() {
 
     const playerAnswer = $('#answer').text();
     const isCorrect = globals.game.submit(playerAnswer);
-    $('answer').text('');
     
     if (isCorrect)
     {
-        const delayBetweenRounds = 350;
-        /* Sperrt Events */
-        globals.ready = false;
-        $('.added_score').fadeTo(25, 0.75);
-        setTimeout(() => {
-            $('.added_score').fadeOut(500);
-            this._appendNextQuiz();
-            globals.game.animateToNextQuiz();
-            /* Wird wieder freigegeben */
-            globals.ready = true;
-        }, delayBetweenRounds);
+        $('answer').text('');
+        this._appendNextQuiz();
+        globals.game.animateToNextQuiz();
     }
     else 
     {
@@ -163,7 +186,7 @@ UI.prototype._onSubmit = function() {
 UI.prototype._appendNextQuiz = function() {
     globals.game.getNextQuizMap().forEach((val, key) => 
     {
-        this._widget({ tag: 'div', className: `op active ${key}` })
+        this._widget({ tag: 'div', className: `op ${key}` })
             .attr('value', val)
             .append(this._widget({ tag: 'span' }).text(val))
             .appendTo('#overlay_container');
@@ -214,6 +237,15 @@ UI.prototype._isSubmit = function(key) {
 
 UI.prototype._isClear = function(key) {
     return key === 'Backspace';
+}
+
+UI.prototype._buildSmoke = function() {
+    const smokeList = $(`<ul class="smoke"></ul>`);
+    for (let i = 0; i < 9; i++) 
+    {
+        smokeList.append($(`<li></li>`));
+    }
+    return smokeList;
 }
 
 UI.prototype._widget = function({tag, id, className}) {

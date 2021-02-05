@@ -82,26 +82,28 @@ Game.prototype.continue = function() {
 
 Game.prototype.submit = function(playerAnswer) {
     /*
-    * stellt Spieldaten bereit
-    */
-    const isCorrect = (playerAnswer === this.currentQuiz.answer().toString());
+     * stellt Spieldaten bereit
+     */
     const basePoint = 100;
     const bonusPoint = this.boostLevel * Math.floor(this.rocketSpeed / 100) * 50 + 50;
-    const boostAmount = isCorrect ? (this.combo * 5 + 10) : 0;
-    const score = isCorrect ? bonusPoint + basePoint : 0;
-    const speed = isCorrect ? 100 : -20;
+    const prevScore = this.score;
+    
+    const isCorrect = (playerAnswer === this.currentQuiz.answer().toString());
+    
+    const deltaBoost = isCorrect ? (this.combo * 5 + 10) : 0;
+    const deltaScore = isCorrect ? bonusPoint + basePoint : 0;
+    const deltaSpeed = isCorrect ? 100 : -20;
     /*
-    * aktualisiert
-    */
+     * aktualisiert
+     */
     this._updateCombo(isCorrect);
-    this._updateScore(score);
-    this._updateBoost(speed, boostAmount);
+    this._updateScore(deltaScore);
+    this._updateBoost(deltaSpeed, deltaBoost);
     /*
      * animiert
      */
     if (isCorrect) 
     {
-        $('.active').removeClass('active').addClass('cleared')
         AnimateUI.correct(); 
         AnimateRocket.flame();
         AnimateRocket.smoke(0);
@@ -109,17 +111,22 @@ Game.prototype.submit = function(playerAnswer) {
     }
     else 
     {
-        $('#answer').addClass('wrong');
         AnimateUI.wrong();
         AnimateQuiz.drop(); 
         AnimateRocket.smoke(.5);
         this.hideBoost();
     }
+    
+    AnimateUI.increment(deltaScore);
+    AnimateUI.score({prev: prevScore, curr: prevScore + deltaScore});
     if (this.floatingAnimations.length == 0)
     {
         this.floatingAnimations.push(AnimateRocket.float_vertical());
         this.floatingAnimations.push(AnimateRocket.float_horizontal());
     }
+    /*
+     * aktualisiert die Geschwindigkeit des Hintergrunds
+     */
     globals.canvas.setVelocity({ x: this.rocketSpeed });
     /*
      * weiter mit UI-Interaktion
@@ -128,22 +135,29 @@ Game.prototype.submit = function(playerAnswer) {
 }
 
 Game.prototype.animateToNextQuiz = function() {
-    AnimateQuiz.clear();
-    AnimateQuiz.next();
+    globals.ready = false;
+
+    $('.added_score').fadeTo(50, 0.75, 'linear');
+    setTimeout(() => {
+        $('.added_score').fadeOut(500);
+        AnimateQuiz.clear();
+        AnimateQuiz.next();
+        globals.ready = true;
+    }, 300);
 }
 
 Game.prototype.getNextQuizMap = function() {
     if (this.currentQuiz != null) this.currentQuiz.next();
-    else 
-    {
-        this.currentQuiz = new Quiz();
-    }
+    else this.currentQuiz = new Quiz();
 
     return this.currentQuiz.currentMap();
 }
 
 Game.prototype.showBoost = function () {
-    $('#boostGauge').fadeTo(300, (this.boostGauge / 500) + 0.05);
+    const baseOpacity = 0.05;
+    const addedOpacity = baseOpacity + (this.boostGauge / 500);
+
+    $('#boostGauge').fadeTo(300, addedOpacity);
 }
 
 Game.prototype.hideBoost = function () {
@@ -167,16 +181,7 @@ Game.prototype._updateScore = function(score) {
 
     this.score = curr;
     
-    if (this.boostLevel > 1) $('#boostLevel').text(`STUFE ${this.boostLevel}`);
-
-    AnimateUI.increment(score);
-    setTimeout(() => {
-        AnimateUI.count({ 
-            targets: '#score', 
-            prev,
-            curr,
-        });
-    }, 1000);
+    if (this.boostLevel > 1) $('#levelText').text(`STUFE ${this.boostLevel}`);
 }
 
 Game.prototype._updateCombo = function(isCorrect) {
@@ -192,24 +197,31 @@ Game.prototype._updateCombo = function(isCorrect) {
 }
 
 Game.prototype._updateBoost = function(speed, boostAmount) {
-    let prev = this.boostGauge;
-    
+    let prevBoost = this.boostGauge;
+    const prevSpeed = this.rocketSpeed;
+
     this.rocketSpeed += speed;
     this.boostGauge += boostAmount;
 
+    
     if (this.boostGauge >= 100) 
     {
         this.boostLevel++;
         this.boostGauge -= 100;
-        $('#boostLevel').text(`STUFE ${this.boostLevel}`);
+        $('#levelText').text(`STUFE ${this.boostLevel}`);
         AnimateUI.levelUp();
-        prev = 0;
+        prevBoost = 0;
     }
     
     AnimateUI.count({ 
         targets: '#boost',
-        prev,
+        prev: prevBoost,
         curr: this.boostGauge,
+    });
+    
+    AnimateUI.speedUp({ 
+        prev: prevSpeed,
+        curr: this.rocketSpeed,
     });
     
 }
