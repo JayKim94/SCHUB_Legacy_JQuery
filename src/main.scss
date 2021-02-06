@@ -1,14 +1,22 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/keyframes';
 @import 'styles/rocket';
 @import 'styles/overlay';
 
-
+@font-face {
+    font-family: 'plex';
+    src: url('./fonts/IBMPlexSans-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    src: url('./fonts/IBMPlexSans-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}
 
 /*
  * Allgemeneine
  */
-
 * {
     @include noselect();   
     margin: 0;
@@ -25,6 +33,15 @@ html, body {
         @include fullScreen();
         position: absolute;
     }
+}
+
+#fade_out {
+    @include fullScreen();
+    position: absolute;
+    z-index: 100;
+    background: #252525;
+    animation: fadeInAndOut 5000ms linear;
+    animation-fill-mode: forwards;
 }
 
 /*
@@ -58,23 +75,23 @@ div#menu {
 /*
  * Buttons
  */
-
 button {
     @include defaultButton();
     font-size: 3rem;
     color: $text_primary;
+    opacity: 0.5;
+    animation: fadeIn 1000ms linear;
     &#start {
         @include setPosition(50%, 65%);
-        animation: fadeIn 1000ms linear;
     }
+
     &#tutorial {
         @include setPosition(50%, 75%);
-        animation: fadeIn 1000ms linear;
     }
+
     &#pause {
-        @include setPosition(90%, 10%);
-        font-size: 2rem;
-        animation: fadeIn 1000ms linear;
+        @include setPosition(calc(100% - 150px), 12%);
+        font-size: 1.5rem;
     }
 }
 
@@ -132,4 +149,107 @@ div#dialog {
         color: $text_primary;
     }
 }
+
+/*
+ * Outro
+ */
+
+ div#earth_container {
+    @include absolute();
+    @include transform(translate(-50%, -50%));
+    @include setPosition(50%, 50%);
+    $earth_size: 400px;
+    
+
+    #scoreboard {
+        @include setPosition(0, -25px);
+        font-size: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        white-space: nowrap;
+        
+        & * {
+            @include transform(translate(0, 0));
+            position: relative;
+        }
+
+        #final_score {
+            margin-bottom: 1rem;
+        }
+
+        .label { font-size: 2rem; color: $text_primary; opacity: .45; font-weight: 100; }
+        .number { font-size: 4rem; @include glow($primary_yellow); }
+    }
+
+    #rocket_orbit {
+        $orbit_size: 600px;
+        @include sizedBox($orbit_size);
+        @include setPosition(0, -($orbit_size / 2));
+        animation: 
+            blurOut 5s linear,
+            rotateFromCenter 10s linear infinite;
+        animation-fill-mode: forwards;
+        transform-origin: 0 50%;
+        transform-box: border-box;
+    }
+
+    .flame_wrapper {
+        $flame_size: 60px;
+        @include setPosition(-90px, 30px);
+        z-index: -1;
+        animation: flicker 3ms ease-in infinite;
+        .flame {
+            @include transform(rotateZ(-45deg));
+            transform-origin: center;
+            position: absolute;
+            bottom: 0;
+            border-radius: 0% 50% 50% 50%;
+        }
+        .red {
+            @include sizedBox($flame_size);
+            background-color: orangered;
+            box-shadow: 0px 0px 10px 5px orangered;
+        }
+        .orange {
+            @include sizedBox($flame_size * .75);
+            left: 16px;
+            bottom: 10px;
+            background-color: orange;
+            box-shadow: 0px 0px 10px 5px orange;
+        }
+        .gold {
+            @include sizedBox($flame_size * .55);
+            left: 28px;
+            bottom: 16px;
+            background-color: gold;
+            box-shadow: 0px 0px 10px 5px gold;
+        }
+        .white {
+            @include sizedBox($flame_size * .45);
+            left: 36px;
+            bottom: 21px;
+            background-color: lightyellow;
+            box-shadow: 0px 0px 10px 5px lightyellow;
+        }
+    }
+    
+    #earth {
+        z-index: -1;
+        width: $earth_size;
+        height: $earth_size;
+        background: url(img/earth.jpg);
+        border-radius: 50%;
+        background-size: cover;
+        box-shadow: 
+            inset 0 0 20px #03A9F4,
+            0 0 120px #03A9F4;
+        animation:
+            blurOut 5s linear,
+            animateEarth 40s linear infinite;
+        animation-fill-mode: forwards;
+     }
+ }
 

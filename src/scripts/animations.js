@@ -53,8 +53,8 @@ export const AnimateRocket = {
             targets: '#rocket_container',
             easing: 'linear',
             top: [
-                {value: `${startingTop - 20}px`, duration: 2500},
-                {value: `${startingTop + 100}px`, duration: 3700},
+                {value: `${startingTop - 75}px`, duration: 2500},
+                {value: `${startingTop + 50}px`, duration: 3700},
             ],
             loop: true,
             direction: 'alternate',
@@ -64,10 +64,11 @@ export const AnimateRocket = {
         return anime({
             targets: '#rocket_container',
             left: [
-                {value: `45%`, duration: 2200, easing: 'linear'},
-                {value: `60%`, duration: 8300, easing: 'linear'},
+                {value: `40%`, duration: 4200 },
+                {value: `62.5%`, duration: 6300, easing: 'easeOutExpo' },
             ],
             loop: true,
+            easing: 'linear',
             direction: 'alternate',
         });
     }
@@ -75,10 +76,6 @@ export const AnimateRocket = {
 
 export const AnimateQuiz = {
     clear: () => {
-        document.querySelectorAll('.active').forEach((el) => {
-            el.classList.remove('active');
-            el.classList.add('cleared');
-        });
         anime({
             targets: '.cleared',
             left: { value: '-=350px', duration: 150, easing: 'easeInCirc' },
@@ -93,11 +90,8 @@ export const AnimateQuiz = {
         });
     },
     next: () => {
-        document.querySelectorAll('.op:not(.cleared)').forEach((el) => {
-            el.classList.add('active');
-        });
         anime({
-            targets: '.op.active',
+            targets: '.active',
             easing: 'easeInExpo',
             duration: 300,
             delay: function(el, i) {
@@ -127,7 +121,7 @@ export const AnimateQuiz = {
             ],
             complete: function(anim) {
                 const cleared = document.getElementsByClassName('cleared');
-                while (cleared.length > 0) cleared.item(0).remove();
+                while (cleared?.length > 0) cleared?.item(0)?.remove();
             },
         });
     },
@@ -137,7 +131,7 @@ export const AnimateUI = {
     score: ({prev, curr}) => {
         anime({
             targets: '#score',
-            delay: 1000,
+            delay: 1500,
             color: '#EFEFEF',
             innerHTML: [prev, curr],
             easing: 'easeOutCirc',
@@ -151,7 +145,7 @@ export const AnimateUI = {
             color: isNegative ? ['#FF5555', '#FF5555', '#EFEFEF'] : '#EFEFEF',
             innerHTML: [prev, curr],
             easing: 'easeOutCirc',
-            round,
+            round: round,
         });
     },
     speedUp: ({prev, curr}) => {
@@ -165,9 +159,15 @@ export const AnimateUI = {
     },
     increment: (score) => {
         anime({
+            targets: '.added_score',
+            opacity: [0, 0.75, 0.75, 0.75, 0],
+            easing: 'linear',
+            duration: 1500,
+        });
+        anime({
             targets: '#increment',
-            innerHTML: [0, score],
-            duration: 300,
+            innerHTML: [0, score, score, score, 0],
+            duration: 1500,
             easing: 'linear',
             round: 1,
         });
@@ -184,15 +184,15 @@ export const AnimateUI = {
     levelUp: () => {
         anime({
             targets: '#levelText',
-            fontSize: ['1.5rem', '2.5rem', '1.5rem'],
-            color: ['#F5F5F5', '#FDF200', '#F5F5F5'],
-            opacity: [0.25, 1, 0.25],
+            fontSize: ['1.5rem', '2.5rem', '2.5rem', '1.5rem'],
+            color: ['#F5F5F5', '#FDF200', '#FDF200', '#F5F5F5'],
+            opacity: [0.25, 1, 1, 0.25],
             textShadow: [
                 "0px 0px 0px #EFEFEF",
                 "0px 0px 15px #FDF200",
                 "0px 0px 0px #EFEFEF",
             ],
-            duration: 1500,
+            duration: 3500,
             easing: 'easeOutCirc',
         });
     },

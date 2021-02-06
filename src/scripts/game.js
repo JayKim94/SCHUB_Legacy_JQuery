@@ -13,11 +13,13 @@ import { Quiz } from './models/quiz.js';
 export function Game() {
     this.currentQuiz;
     this.init();
+
 }
 
 Game.prototype.init = function() {
     this.isReady = false;
     this.isPaused = false;
+    this.isEnded = false;
     this.score = 0;
     this.rocketSpeed = 0;
     this.combo = 0;
@@ -104,6 +106,7 @@ Game.prototype.submit = function(playerAnswer) {
      */
     if (isCorrect) 
     {
+        $('.active').removeClass('active').addClass('cleared');
         AnimateUI.correct(); 
         AnimateRocket.flame();
         AnimateRocket.smoke(0);
@@ -117,8 +120,8 @@ Game.prototype.submit = function(playerAnswer) {
         this.hideBoost();
     }
     
-    AnimateUI.increment(deltaScore);
     AnimateUI.score({prev: prevScore, curr: prevScore + deltaScore});
+    if (deltaScore > 0) AnimateUI.increment(deltaScore);
     if (this.floatingAnimations.length == 0)
     {
         this.floatingAnimations.push(AnimateRocket.float_vertical());
@@ -136,10 +139,8 @@ Game.prototype.submit = function(playerAnswer) {
 
 Game.prototype.animateToNextQuiz = function() {
     globals.ready = false;
-
-    $('.added_score').fadeTo(50, 0.75, 'linear');
+    
     setTimeout(() => {
-        $('.added_score').fadeOut(500);
         AnimateQuiz.clear();
         AnimateQuiz.next();
         globals.ready = true;
@@ -171,7 +172,16 @@ Game.prototype._startTimer = function() {
         if (this.isPaused) return;
 
         this.timeLeft--;
-        $('#timer_num').text(`${this.timeLeft}`);
+        
+        if (this.timeLeft < 0) 
+        {
+            $('.in_game_ui').fadeOut(3000);
+            this.isEnded = true;
+        }
+        else 
+        {
+            $('#timer_num').text(`${this.timeLeft}`);
+        }
     }, tick);
 }
 
@@ -217,6 +227,7 @@ Game.prototype._updateBoost = function(speed, boostAmount) {
         targets: '#boost',
         prev: prevBoost,
         curr: this.boostGauge,
+        round: 1,
     });
     
     AnimateUI.speedUp({ 
