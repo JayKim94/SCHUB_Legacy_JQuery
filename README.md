@@ -1,4 +1,7 @@
+
 # SCHUB!
+
+(In Bearbeitung)
 Ein kleines Spiel für Grundschüler (Mathematik)
 
 Titel
@@ -12,6 +15,6 @@ Zum Starten
 1. npm install
 2. npm run start
 
-Verwendete Frameworks:
+Verwendete Frameworks / Bibliotheken:
   - jquery
   - anime.js
