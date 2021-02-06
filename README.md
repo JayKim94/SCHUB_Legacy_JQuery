@@ -11,3 +11,7 @@ Im Spiel
 Zum Starten
 1. npm install
 2. npm run start
+
+Verwendete Frameworks:
+  - jquery
+  - anime.js
