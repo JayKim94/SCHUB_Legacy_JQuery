@@ -100,7 +100,7 @@ Game.prototype.submit = function(playerAnswer) {
      */
     this._updateCombo(isCorrect);
     this._updateScore(deltaScore);
-    this._updateBoost(deltaSpeed, deltaBoost);
+    this._updateSpeedAndBoost(deltaSpeed, deltaBoost);
     /*
      * animiert
      */
@@ -115,7 +115,6 @@ Game.prototype.submit = function(playerAnswer) {
     else 
     {
         AnimateUI.wrong();
-        AnimateQuiz.drop(); 
         AnimateRocket.smoke(.5);
         this.hideBoost();
     }
@@ -206,14 +205,13 @@ Game.prototype._updateCombo = function(isCorrect) {
     }
 }
 
-Game.prototype._updateBoost = function(speed, boostAmount) {
+Game.prototype._updateSpeedAndBoost = function(speed, boostAmount) {
     let prevBoost = this.boostGauge;
     const prevSpeed = this.rocketSpeed;
 
     this.rocketSpeed += speed;
     this.boostGauge += boostAmount;
 
-    
     if (this.boostGauge >= 100) 
     {
         this.boostLevel++;
@@ -223,17 +221,14 @@ Game.prototype._updateBoost = function(speed, boostAmount) {
         prevBoost = 0;
     }
     
-    AnimateUI.count({ 
-        targets: '#boost',
-        prev: prevBoost,
-        curr: this.boostGauge,
-        round: 1,
-    });
+    if (boostAmount > 0)
+    {
+        AnimateUI.gaugeUp({ prev: prevBoost, curr: this.boostGauge });
+    }
     
-    AnimateUI.speedUp({ 
-        prev: prevSpeed,
-        curr: this.rocketSpeed,
-    });
-    
+    if (speed > 0) 
+    {
+        AnimateUI.speedUp({ prev: prevSpeed, curr: this.rocketSpeed });
+    }
 }
 //#endregion

@@ -111,20 +111,7 @@ export const AnimateQuiz = {
             },
         });
     },
-    drop: () => {
-        anime({
-            targets: '.cleared',
-            rotate: { value: random(30, 150), duration: 250, easing: 'linear' },
-            keyframes: [
-                { top: '-=30px', duration: 100, easing: 'linear' },
-                { top: (innerHeight + 300), duration: 400, easing: 'easeInCirc' }
-            ],
-            complete: function(anim) {
-                const cleared = document.getElementsByClassName('cleared');
-                while (cleared?.length > 0) cleared?.item(0)?.remove();
-            },
-        });
-    },
+
 }
 
 export const AnimateUI = {
@@ -138,14 +125,13 @@ export const AnimateUI = {
             round: 1,
         });
     },
-    count: ({targets, prev, curr, round = 1}) => {
-        const isNegative = (curr - prev < 0);
+    gaugeUp: ({prev, curr}) => {
         anime({
-            targets: targets,
-            color: isNegative ? ['#FF5555', '#FF5555', '#EFEFEF'] : '#EFEFEF',
+            targets: '#boost',
+            color: ['#EFEFEF'],
             innerHTML: [prev, curr],
             easing: 'easeOutCirc',
-            round: round,
+            round: 1,
         });
     },
     speedUp: ({prev, curr}) => {
@@ -231,6 +217,19 @@ export const AnimateUI = {
             ],
             loop: 3,
             duration: 200,
+        });
+        const cleared = document.getElementsByClassName('cleared');
+        if (typeof(cleared) != 'undefined' && cleared != null) anime({
+            targets: '.cleared',
+            rotate: { value: random(30, 150), duration: 250, easing: 'linear' },
+            keyframes: [
+                { top: '-=30px', duration: 100, easing: 'linear' },
+                { top: (innerHeight + 300), duration: 400, easing: 'easeInCirc' }
+            ],
+            complete: function(anim) {
+                const cleared = document.getElementsByClassName('cleared');
+                while (cleared?.length > 0) cleared?.item(0)?.remove();
+            },
         });
     },
 };

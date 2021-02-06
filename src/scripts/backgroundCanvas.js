@@ -49,7 +49,7 @@ BackgroundCanvas.prototype.update = function() {
     if (this.backgroundRotateRadians >= 2 * Math.PI) this.backgroundRotateRadians = 0;
     if (this.backgroundRotateRadians >= 0) this.backgroundRotateRadians += this.rotateValue;
 
-    if (this.isResetting) this.rotateValue *= 1.05;
+    if (this.isResetting) this.rotateValue *= 1.01;
 
     // draw stars
     this.stars.forEach((star) => {

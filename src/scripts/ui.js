@@ -177,10 +177,10 @@ UI.prototype._onClickStart = function() {
 
 UI.prototype._onSubmit = function() {
     if ($('#answer').text().length <= 0) return;
-    if (globals.game.isEnded == true)
-    {
-        this._showOutroScreen();
-    }
+
+    const buffer = 1000;
+    globals.ready = false;
+    setTimeout(() => { globals.ready = true; }, buffer);
 
     const playerAnswer = $('#answer').text();
     const isCorrect = globals.game.submit(playerAnswer);
