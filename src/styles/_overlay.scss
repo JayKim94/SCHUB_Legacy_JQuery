@@ -177,6 +177,7 @@ div#overlay_container {
     div#timer {
         @include glow($primary_blue);
         @include setPosition(50%, 12.5%);
+        &.under-ten { @include glow($neon_red); }
         #timer_num {
             font-size: 3rem;
         }

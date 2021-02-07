@@ -121,6 +121,7 @@ button {
         @include glow($primary_pink);
     }
 
+      
     &[value="*"] {
         @include glow($primary_yellow); 
         animation: shining_multi 250ms ease-in-out infinite; 

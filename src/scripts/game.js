@@ -106,11 +106,11 @@ Game.prototype.submit = function(playerAnswer) {
      */
     if (isCorrect) 
     {
-        $('.active').removeClass('active').addClass('cleared');
         AnimateUI.correct(); 
         AnimateRocket.flame();
         AnimateRocket.smoke(0);
         this.showBoost();
+        $('.active').removeClass('active').addClass('cleared');
     }
     else 
     {
@@ -171,6 +171,8 @@ Game.prototype._startTimer = function() {
         if (this.isPaused) return;
 
         this.timeLeft--;
+
+        if (this.timeLeft <= 10) $('#timer').addClass('under-ten');
         
         if (this.timeLeft < 0) 
         {

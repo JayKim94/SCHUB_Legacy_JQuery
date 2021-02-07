@@ -79,7 +79,7 @@ export const AnimateQuiz = {
         anime({
             targets: '.cleared',
             left: { value: '-=350px', duration: 150, easing: 'easeInCirc' },
-            opacity: { value: 0.1, duration: 500, easing: 'linear' },
+            opacity: { value: 0.25, duration: 500, easing: 'linear' },
             complete: function(anim) {
                 document.querySelectorAll('.cleared').forEach((element) => {
                     if (parseInt(element.style.left) < 0) {
@@ -205,7 +205,9 @@ export const AnimateUI = {
         anime({
             targets: '.wrong',
             complete: function(anim) {
-                document.getElementById('answer').classList.remove('wrong');
+                const answer = document.getElementById('answer');
+                answer.classList.remove('wrong');
+                answer.innerText = '';
             },
             keyframes: [
                 {left: '-=10px'},
@@ -215,11 +217,11 @@ export const AnimateUI = {
                 {left: '-=12px'},
                 {left: '+=12px'},
             ],
-            loop: 3,
+            loop: 4,
             duration: 200,
         });
         const cleared = document.getElementsByClassName('cleared');
-        if (typeof(cleared) != 'undefined' && cleared != null) anime({
+        if (cleared.length > 0) anime({
             targets: '.cleared',
             rotate: { value: random(30, 150), duration: 250, easing: 'linear' },
             keyframes: [
@@ -228,7 +230,7 @@ export const AnimateUI = {
             ],
             complete: function(anim) {
                 const cleared = document.getElementsByClassName('cleared');
-                while (cleared?.length > 0) cleared?.item(0)?.remove();
+                while (cleared.length > 0) cleared.item(0).remove();
             },
         });
     },
