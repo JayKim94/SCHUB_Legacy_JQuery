@@ -11,8 +11,6 @@ export function UI() {
 }
 
 UI.prototype.init = function() {
-    $(window).on('resize', (e) => globals.canvas.init());
-
     this.isDialogOpen = false;
     this._showIntroScreen();
 
@@ -34,7 +32,7 @@ UI.prototype._showIntroScreen = function() {
         .append(this._widget({ tag: 'button', id: 'tutorial' })
             .text('TUTORIAL')
             .on('click', () => {}))
-        .appendTo('body');
+        .appendTo('#spiel_body');
     /*
      * Rocket SVG + Flamme + Rauch
      */
@@ -93,11 +91,11 @@ UI.prototype._showInGameScreen = function() {
     /*
      * Status (unten mitte)
      */
-    this._widget({ tag: 'div', className: 'status', className: 'in_game_ui' })
+    this._widget({ tag: 'div', className: 'status in_game_ui' })
         .append(this._widget({ tag: 'p', id: 'boostGauge' })
+            .css({opacity: 0})
             .append(this._widget({ tag: 'span', id: 'boost'}).text('0'))
-            .append(this._widget({ tag: 'span', className: 'percent' }).text('%'))
-            .css({opacity: 0}))
+            .append(this._widget({ tag: 'span', className: 'percent' }).text('%')))
         .appendTo('#overlay_container');
     this._widget({ tag: 'div', id: 'boostLevel', className: 'in_game_ui' })
         .append(this._widget({ tag: 'div', id: 'levelText' }).text('STUFE 1'))
@@ -127,7 +125,7 @@ UI.prototype._showPausedScreen = function() {
                     globals.game.continue();
                     globals.ready = true;
                 }))
-            .appendTo('body');
+            .appendTo('#spiel_body');
 
         this.isDialogOpen = true;
     }

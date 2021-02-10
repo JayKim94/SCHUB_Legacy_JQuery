@@ -10,7 +10,7 @@ import { random } from './utils.js';
 export function BackgroundCanvas() {
     this.backgroundRotateRadians = 0;
     this.backgroundAlpha = 0.98;
-    this.starsCount = 500;
+    this.starsCount = 300;
     this.rotateValue = 0.0005;
     this.stars = [];
     this.isResetting = false;
@@ -19,10 +19,12 @@ export function BackgroundCanvas() {
 //#endregion
 //#region Methoden
 BackgroundCanvas.prototype.init = function() {
-    this.canvas = document.querySelector('canvas');
+    const spielDiv = document.getElementById('spiel_body');
+    this.canvas = document.createElement('canvas');
+    spielDiv.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
-    this.canvas.width = innerWidth;
-    this.canvas.height = innerHeight;
+    this.canvas.width = spielDiv.offsetWidth;
+    this.canvas.height = spielDiv.offsetHeight;
     this.drawWidth = (this.canvas.width + 1600) / 2;
     this.drawHeight = (this.canvas.height + 1000) / 2;
     this.draw();
@@ -81,12 +83,16 @@ BackgroundCanvas.prototype.setBackgroundAlpha = function(alpha) {
 }
 
 BackgroundCanvas.prototype._getRandomStar = function(x = random(-this.drawWidth, this.drawWidth)){
-    const color = `rgba(${random(80, 275)}, 171, 255, ${random(.25, .5)})`;  
+    const hue = random(70, 270);
+    const opacity = (Math.random() / 2) + 0.2;
+    const shadow = `rgba(${hue}, 171, 255, 1)`;
+    const color = `rgba(${random(70, 270)}, 171, 255, ${opacity})`;
     return {
         x,
         y: random(-this.drawHeight, this.drawHeight),
-        radius: random(1, 3),
+        radius: random(1, 2),
         color,
+        shadow,
         ctx: this.ctx,
     };
 }

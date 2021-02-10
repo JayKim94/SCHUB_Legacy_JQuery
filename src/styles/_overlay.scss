@@ -48,7 +48,6 @@ div#overlay_container {
         }
 
         #currentSpeed {
-            @include glow($neon_red);
             font-size: 1.25rem;
             opacity: .75;
             &::after {
@@ -93,7 +92,7 @@ div#overlay_container {
         #circle {
             @include sizedBox(250px);
             transform-origin: center;
-            animation: rotateFull 2500ms linear infinite;
+            animation: rotateFull 10000ms linear infinite;
             border-radius: 50%;
             background: radial-gradient(transparent, transparentize($neon_blue, 0.5), transparentize($neon_red, 0.5));
             &::after {
@@ -168,7 +167,7 @@ div#overlay_container {
     }
 
     div#countdown {
-        @include glow($primary_blue);
+        @include glow($text_primary);
         @include setPosition(50%, 50%);
         display: none;
         font-size: 8rem;

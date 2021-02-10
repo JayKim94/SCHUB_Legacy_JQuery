@@ -10,11 +10,11 @@
         @include transform(rotate(-15deg));
     }
     img#rocket {
-        width: 125px;
+        width: 100px;
     }
     
     .smoke_wrapper {
-        @include setPosition(-110px, -30px);
+        @include setPosition(-80px, -30px);
         z-index: -1;
         .smoke {
             @include setPosition(50%, 0);
@@ -24,8 +24,8 @@
             & > li {
                 position: absolute;
                 list-style: none;
-                width: 60px;
-                height: 60px;
+                width: 50px;
+                height: 50px;
                 background-color: #575757;
                 border-radius: 50%;
                 opacity: 0;
@@ -63,16 +63,19 @@
         }
     }
     .flame_wrapper {
-        @include setPosition(-110px, 40px);
+        @include setPosition(-90px, 40px);
         opacity: 0;
         z-index: -1;
         animation: flicker 3ms ease-in infinite;
         .flame {
-            @include transform(rotateZ(-45deg));
+            @include transform(rotateZ(-45deg) scale(0.5));
             transform-origin: center;
             position: absolute;
             bottom: 0;
             border-radius: 0% 50% 50% 50%;
+            transition: transform 1000ms;
+            &._scale6 { @include transform(rotateZ(-45deg) scale(0.6)); }
+            &._scale8 { @include transform(rotateZ(-45deg) scale(0.8)); }
         }
         .red {
             @include sizedBox($flame_size);
