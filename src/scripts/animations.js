@@ -8,6 +8,21 @@ import globals from './globals';
 import { random } from './utils';
 
 export const AnimateRocket = {
+    shake: () => {
+        anime({
+            targets: '#rocket_container',
+            top: [
+                '-=5px',
+                '+=5px',
+                '-=3px',
+                '+=3px',
+                '-=4px',
+                '+=4px',
+            ],
+            loop: 4,
+            duration: 200,
+        });
+    },
     flame: () => {
         const speed = globals.game.rocketSpeed;
         const ratio = speed / (speed + 100);
@@ -32,6 +47,25 @@ export const AnimateRocket = {
             easing: 'linear',
             left: '50%',
             duration: 10000,
+        });
+    },
+    outroSequence: () => {
+        const startingTop = innerHeight / 3;
+        anime({
+            targets: '#rocket_container',
+            easing: 'easeOutExpo',
+            top: startingTop,
+            left: '50%',
+            duration: 1500,
+            complete: function(anim) {
+                anime({
+                    targets: '#rocket_container',
+                    delay: 2000,
+                    easing: 'easeOutExpo',
+                    left: '120%',
+                    duration: 5500,                    
+                });
+            },
         });
     },
     start: () => {
@@ -64,8 +98,8 @@ export const AnimateRocket = {
         return anime({
             targets: '#rocket_container',
             left: [
-                {value: `40%`, duration: 4200 },
-                {value: `62.5%`, duration: 6300, easing: 'easeOutExpo' },
+                {value: `45%`, duration: 3200 },
+                {value: `60%`, duration: 8300, easing: 'easeOutExpo' },
             ],
             loop: true,
             easing: 'linear',
@@ -97,7 +131,7 @@ export const AnimateQuiz = {
             delay: function(el, i) {
                 return i * 150;
             },
-            opacity: {value: 0.75, duration: 200},
+            opacity: .75,
             fontSize: [
                 {value: '2rem', duration: 150},
                 {value: '6rem'},
@@ -111,7 +145,21 @@ export const AnimateQuiz = {
             },
         });
     },
-
+    dropEverything: () => {
+        const ops = document.getElementsByClassName('op');
+        if (ops.length > 0) anime({
+            targets: '.op',
+            rotate: { value: random(30, 150), duration: 250, easing: 'linear' },
+            keyframes: [
+                { top: '-=30px', duration: 100, easing: 'linear' },
+                { top: (innerHeight + 300), duration: 400, easing: 'easeInCirc' }
+            ],
+            complete: function(anim) {
+                const ops_check = document.getElementsByClassName('op');
+                while (ops_check.length > 0) ops_check.item(0).remove();
+            },
+        });
+    },
 }
 
 export const AnimateUI = {
@@ -234,4 +282,17 @@ export const AnimateUI = {
             },
         });
     },
+};
+
+export const AnimateScoreboard = 
+{
+    numbers: function({target, value}) {
+        anime({
+            targets: target,
+            innerHTML: [0, value],
+            duration: 5000,
+            easing: 'easeOutExpo',
+            round: 1,
+        });
+    }
 };

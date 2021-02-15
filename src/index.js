@@ -6,11 +6,9 @@ import { BackgroundCanvas } from './scripts/backgroundCanvas.js';
 import { Game } from './scripts/game';
 
 $(function() {
+    globals.canvas = new BackgroundCanvas();
     const ui = new UI();
-    const game = new Game();
-    const canvas = new BackgroundCanvas();
-    globals.canvas = canvas;
-    globals.game = game;
+    globals.game = new Game();
     animateBackgroundCanvas();
 });
 

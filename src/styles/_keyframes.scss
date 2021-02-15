@@ -93,3 +93,15 @@
     75% { opacity: 1; }
     100% { opacity: 0; }
 }
+
+@keyframes toGray
+{
+    from { filter: none; }
+    to { filter: grayscale(.7); }
+}
+
+@keyframes gradient
+{
+    from { background-position-x: 0%; }
+    to { background-position-x: 100%; }
+}

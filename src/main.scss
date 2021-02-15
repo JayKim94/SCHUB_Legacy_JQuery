@@ -61,6 +61,18 @@ div#menu {
         color: $text_primary;
         font-size: 13rem;
         animation: fadeInFull 10000ms linear;
+        
+        &.outro {
+            opacity: 0.5;
+            animation: gradient 10000ms infinite alternate;
+            background-image: linear-gradient(to right, $neon_red, $text_primary, $neon_blue);
+            background-size: 400%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            -webkit-text-fill-color: transparent; 
+            -moz-text-fill-color: transparent;
+        }
     }
 
     p {
@@ -69,6 +81,53 @@ div#menu {
         font-size: .9rem;
         text-align: center;
         animation: fadeInFull 10000ms linear;
+    }
+
+    .scoreboard {
+        @include setPosition(50%, 55%);
+        min-width: 800px;
+        max-width: 50%;
+        
+        & * { @include transform(translate(0, 0)); position: initial; animation: none; }
+
+        div.scores {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+        }
+
+        #finalLabel {
+            color: $text_primary;
+            text-shadow: 0px 0px 10px $text_primary;
+            opacity: 1;
+            font-size: 2.5rem;
+        }
+
+        #finalScore {
+            @include glow($neon_blue);
+            font-size: 5rem;
+            margin: 10px 0 30px 0;
+        }
+
+        $unit: 1.25rem;
+        #maxSpeed::after { content: 'km/s'; font-size: $unit; text-shadow: none; }
+        #accuracy::after { content: '%'; font-size: $unit; text-shadow: none; }
+        #quizCount::after { content: ' Aufgaben'; font-size: $unit; text-shadow: none; }
+
+        .label {
+            margin-top: 10px;
+            color: $text_primary;
+            text-shadow: 0px 0px 10px #25252599;
+            font-size: 1rem;
+            opacity: .75;
+        }
+        
+        .numbers {
+            margin-top: 10px;
+            @include glow(transparentize($primary_yellow, 0.3));
+            font-size: 2.5rem;
+            opacity: 1;
+        }
     }
 }
 
@@ -103,7 +162,6 @@ button {
     opacity: 0;
     color: $text_primary;
     width: fit-content;
-    transition: opacity 50ms;
     
     &.blurred {
         filter: blur(16px);
@@ -160,30 +218,8 @@ div#dialog {
     @include transform(translate(-50%, -50%));
     @include setPosition(50%, 50%);
     $earth_size: 400px;
-    
-
-    #scoreboard {
-        @include setPosition(0, -25px);
-        font-size: 2rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        white-space: nowrap;
-        
-        & * {
-            @include transform(translate(0, 0));
-            position: relative;
-        }
-
-        #final_score {
-            margin-bottom: 1rem;
-        }
-
-        .label { font-size: 2rem; color: $text_primary; opacity: .45; font-weight: 100; }
-        .number { font-size: 4rem; @include glow($primary_yellow); }
-    }
+    animation: toGray 10000ms linear;
+    animation-fill-mode: forwards;
 
     #rocket_orbit {
         $orbit_size: 600px;
@@ -191,7 +227,7 @@ div#dialog {
         @include setPosition(0, -($orbit_size / 2));
         animation: 
             blurOut 5s linear,
-            rotateFromCenter 10s linear infinite;
+            rotateFromCenter 20s linear infinite;
         animation-fill-mode: forwards;
         transform-origin: 0 50%;
         transform-box: border-box;
@@ -254,3 +290,4 @@ div#dialog {
      }
  }
 
+ 

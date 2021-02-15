@@ -94,6 +94,9 @@ div#overlay_container {
             transform-origin: center;
             animation: rotateFull 10000ms linear infinite;
             border-radius: 50%;
+            filter: grayscale(1);
+            transition: filter 5000ms;
+            &._active { filter: none; }
             background: radial-gradient(transparent, transparentize($neon_blue, 0.5), transparentize($neon_red, 0.5));
             &::after {
                 @include absolute();

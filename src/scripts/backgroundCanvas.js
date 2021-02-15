@@ -8,11 +8,13 @@ import { random } from './utils.js';
 
 //#region Constructor
 export function BackgroundCanvas() {
-    this.backgroundRotateRadians = 0;
+    this.backgroundRotateRadians = 0.001;
     this.backgroundAlpha = 0.98;
     this.starsCount = 300;
     this.rotateValue = 0.0005;
+    this.currentVelocity = 0;
     this.stars = [];
+    this.isRotating = false;
     this.isResetting = false;
     this.init();
 }
@@ -27,15 +29,19 @@ BackgroundCanvas.prototype.init = function() {
     this.canvas.height = spielDiv.offsetHeight;
     this.drawWidth = (this.canvas.width + 1600) / 2;
     this.drawHeight = (this.canvas.height + 1000) / 2;
+    this.isRotating = true;
     this.draw();
 }
 
 BackgroundCanvas.prototype.setVelocity = function({x}) {
-    this.stars.forEach(star => { star.velocity.x = (x / 100); });
+    this.currentVelocity = x;
+    this.stars.forEach(star => { star.velocity.x = this.currentVelocity; });
 }
 
-BackgroundCanvas.prototype.setRotationValue = function(value) {
-    this.rotateValue = value;
+BackgroundCanvas.prototype.rotate = function() {
+    this.rotateValue = 0.0005;
+    this.backgroundRotateRadians = 0.0001;
+    this.isRotating = true;
 }
 
 BackgroundCanvas.prototype.update = function() {
@@ -48,10 +54,8 @@ BackgroundCanvas.prototype.update = function() {
     this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
     // takes radians (360° = 2 * Math.PI)
     this.ctx.rotate(this.backgroundRotateRadians);
+    if (this.isRotating && this.backgroundRotateRadians > 0) this.backgroundRotateRadians += this.rotateValue;
     if (this.backgroundRotateRadians >= 2 * Math.PI) this.backgroundRotateRadians = 0;
-    if (this.backgroundRotateRadians >= 0) this.backgroundRotateRadians += this.rotateValue;
-
-    if (this.isResetting) this.rotateValue *= 1.01;
 
     // draw stars
     this.stars.forEach((star) => {
@@ -75,7 +79,21 @@ BackgroundCanvas.prototype.draw = function() {
 
 BackgroundCanvas.prototype.resetRotation = function() {
     this.isResetting = true;
-    this.rotateValue = -(this.rotateValue + 0.005);
+    this.rotateValue = -(this.rotateValue + 0.001);
+}
+
+BackgroundCanvas.prototype.resetVelocity = function() {
+    const division = 100;
+    let lerpAmount = Math.floor(this.currentVelocity / division);
+    if (lerpAmount <= 0) lerpAmount = 1; 
+    for (let i = 0; i < division; i++)
+    {
+        setTimeout(() => {
+            this.currentVelocity -= lerpAmount;
+            if (this.currentVelocity < 0) this.currentVelocity = 0;
+            this.stars.forEach(star => { star.velocity.x = this.currentVelocity; })
+        }, 10 * i);
+    }
 }
 
 BackgroundCanvas.prototype.setBackgroundAlpha = function(alpha) {
@@ -86,7 +104,7 @@ BackgroundCanvas.prototype._getRandomStar = function(x = random(-this.drawWidth,
     const hue = random(70, 270);
     const opacity = (Math.random() / 2) + 0.2;
     const shadow = `rgba(${hue}, 171, 255, 1)`;
-    const color = `rgba(${random(70, 270)}, 171, 255, ${opacity})`;
+    const color = `rgba(${hue}, 171, 255, ${opacity})`;
     return {
         x,
         y: random(-this.drawHeight, this.drawHeight),

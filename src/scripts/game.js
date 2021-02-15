@@ -20,7 +20,10 @@ Game.prototype.init = function() {
     this.isReady = false;
     this.isPaused = false;
     this.score = 0;
-    this.rocketSpeed = 0;
+    this.rocketSpeed = 10;
+    this.maxSpeed = 0;
+    this.quizCount = 0;
+    this.submitCount = 0;
     this.combo = 0;
     this.highestCombo = 0;
     this.boostGauge = 0;
@@ -33,48 +36,28 @@ Game.prototype.init = function() {
 
 //#region Methoden
 
-Game.prototype.startGame = function() {
-    this.openingAnimation.pause();
-    /*
-     * initialisiert Timer
-     */
-    this.timeLeft = 60;
-    $('#timer_num').text(`${this.timeLeft}`);
+Game.prototype.ready = function() {
     /*
      * setzt Rotation zurück
      */
     globals.canvas.resetRotation();
     globals.canvas.setBackgroundAlpha(0.55);
+    globals.canvas.setVelocity({x: 0});
     /*
-     * zur Start-position
+     * zur Startposition
      */
-    AnimateRocket.start();
-    /*
-     * Countdown
-     */
-    const DELAY = 1000;
-    const countdown = $('#countdown');
-    setTimeout(() => { countdown.text('3').fadeIn(); }, DELAY);
-    setTimeout(() => { countdown.text('2'); countdown.addClass('_2'); }, DELAY * 2);
-    setTimeout(() => { countdown.text('1'); countdown.addClass('_1'); }, DELAY * 3);
-    setTimeout(() => 
-    { 
-        countdown.remove();
-        /*
-         * zeigt das Eingabefeld an
-         */
-        $('#answer_field').fadeIn(1500);
-        /*
-         * startet die Runde
-         */
-        this._startTimer();
-        AnimateQuiz.next();
-        globals.canvas.setVelocity({ x: 10 });
-        globals.ready = true;
-    }, DELAY * 4);
+   this.openingAnimation.pause();
+   AnimateRocket.start();
+}
+
+Game.prototype.start = function() {
+    globals.canvas.setVelocity({ x: this.rocketSpeed / 1000 });
+    globals.ready = true;
+    AnimateQuiz.next();
 }
 
 Game.prototype.submit = function(playerAnswer) {
+    this.submitCount++;
     const isCorrect = (playerAnswer === this.currentQuiz.answer().toString());
     /*
      * berechnet die erhaltene Punktzahl
@@ -82,11 +65,12 @@ Game.prototype.submit = function(playerAnswer) {
     let deltaBoost, deltaScore;
     if (isCorrect)
     {
+        this.quizCount++;
         const score_base = 100;
         const score_combo = (Math.pow(this.combo, 2) * 100);
         const score_speed = Math.floor(this.rocketSpeed / 100) * 125; 
 
-        deltaBoost = this.boostLevel < 2 ? 40 : 10;
+        deltaBoost = this.boostLevel > 1 ? 10 + this.combo * 3 : 30;
         deltaScore = score_base + score_combo + score_speed;
     }
     else
@@ -107,8 +91,15 @@ Game.prototype.submit = function(playerAnswer) {
     {
         AnimateUI.correct(); 
         AnimateRocket.flame();
-        AnimateRocket.smoke(0);
+        
+        if (this.boostLevel > 1) AnimateRocket.smoke(0);
+        else AnimateRocket.shake();
+
         this.showBoost();
+        /*
+         * färbt das Antwortfeld
+         */
+        if (!$('#circle').hasClass('_active')) $('#circle').addClass('_active');
         /*
          * markiert das Quiz für anschließenden Animationen
          */
@@ -116,6 +107,7 @@ Game.prototype.submit = function(playerAnswer) {
     }
     else 
     {
+        if ($('#circle').hasClass('_active')) $('#circle').removeClass('_active');
         AnimateUI.wrong();
         AnimateRocket.smoke(.5);
         this.hideBoost();
@@ -125,7 +117,6 @@ Game.prototype.submit = function(playerAnswer) {
         this.floatingAnimations.push(AnimateRocket.float_vertical());
         this.floatingAnimations.push(AnimateRocket.float_horizontal());
     }
-
     /*
      * weiter mit UI-Interaktion
      */
@@ -147,7 +138,7 @@ Game.prototype.continue = function() {
      */
     this.isPaused = false;
     this.floatingAnimations.forEach(anim => anim.play());
-    globals.canvas.setVelocity({ x: this.rocketSpeed });
+    globals.canvas.setVelocity({ x: this.rocketSpeed / 1000 });
 }
 
 Game.prototype.animateToNextQuiz = function() {
@@ -193,38 +184,34 @@ Game.prototype.hideBoost = function () {
     $('#boostGauge').fadeTo(150, 0.0);
 }
 
+Game.prototype.animateOutro = function() {
+    /*
+     * Outro
+     */ 
+    this.floatingAnimations.forEach(anim => anim.pause());
+    AnimateRocket.smoke(0);
+    AnimateRocket.outroSequence();
+    /*
+     * wartet auf die 'last-second' Eingabe,
+     * um Überschneidung zu vermeiden.
+     */ 
+    setTimeout(() => AnimateQuiz.dropEverything(), 1000);
+}
+
+Game.prototype.getResult = function() {
+    return {
+        score: this.score,
+        maxSpeed: this.maxSpeed,
+        quizCount: this.quizCount,
+        accuracy: Math.floor((this.quizCount / this.submitCount) * 100)
+    }
+}
+
 //#endregion
 
 //#region Helper-Funktionen
 
-Game.prototype._startTimer = function() {
-    /*
-     * Interval-Event jede 1 Sekunde
-     */
-    const TICK = 1000;
-    setInterval(() => {
-        /*
-         * läuft nicht, wenn pausiert
-         */
-        if (this.isPaused) return;
-        /*
-         * bis zum 0 Sek.
-         */
-        this.timeLeft--;
-        if (this.timeLeft > 0) 
-        {
-            $('#timer_num').text(`${this.timeLeft}`);
-        }
-        else 
-        {
-            $('.in_game_ui').fadeOut(3000);
-        }
-        /*
-         * Warnung! ( unter 10 Sek. )
-         */ 
-        if (this.timeLeft <= 10) $('#timer').addClass('under-ten');
-    }, TICK);
-}
+
 
 Game.prototype._updateScore = function(score) {
     const prev = this.score;
@@ -249,9 +236,9 @@ Game.prototype._updateCombo = function(isCorrect) {
         this.combo = 0;
     }
     /*
-     * Effekte nur ab 3. Combo
+     * Effekte nur ab 2.
      */
-    if (this.combo > 2)
+    if (this.combo > 1)
     {
         if (this.combo > this.highestCombo) this.highestCombo = this.combo;
         /*
@@ -282,16 +269,17 @@ Game.prototype._updateBoost = function(boostAmount) {
         /*
          * erhöht und animiert aktuelle Geschwindigkeit
          */
-        const bonusSpeed_base = 125;
-        const bonusSpeed_combo = this.highestCombo * 50;
+        const bonusSpeed_base = 1250;
+        const bonusSpeed_combo = this.highestCombo * 500;
         const prevSpeed = this.rocketSpeed;
         this.rocketSpeed += bonusSpeed_base + bonusSpeed_combo;
+        if (this.rocketSpeed > this.maxSpeed) this.maxSpeed = this.rocketSpeed;
         AnimateUI.speedUp({ prev: prevSpeed, curr: this.rocketSpeed });
         /*
          * aktualisiert die Geschwindigkeit des Hintergrunds
          */
-        const canvasVelocity = { x: this.rocketSpeed / 2 };
-        globals.canvas.setVelocity(canvasVelocity);
+        console.log(this.rocketSpeed / 1000);
+        globals.canvas.setVelocity({ x: this.rocketSpeed / 1000 });
         /*
          * skaliert die Flamme nach der aktuellen Stufe
          */
@@ -305,6 +293,7 @@ Game.prototype._updateBoost = function(boostAmount) {
         {
             $('.flame').addClass('_scale6');
         }
+        
     }
     /*
      * animiert Boost
