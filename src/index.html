@@ -7,7 +7,33 @@
     <title>Schub!</title>
 </head>
 <body id="spiel_body">
+    <audio id="bg_music" preload="none">
+        <source src="resources/background_music.mp3" type="audio/mpeg">
+    </audio>
     <div id="overlay_container">
+        <svg
+            class="progress-ring in_game_ui"
+            height="250"
+            width="250"
+            opacity="0">
+            <linearGradient id="linearColors" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="5%" stop-color="#01E400"></stop>
+                <stop offset="25%" stop-color="#FEFF01"></stop>
+                <stop offset="40%" stop-color="#FF7E00"></stop>
+                <stop offset="60%" stop-color="#FB0300"></stop>
+                <stop offset="80%" stop-color="#9B004A"></stop>
+                <stop offset="100%" stop-color="#7D0022"></stop>
+             </linearGradient>
+            <circle
+                class="progress-ring__circle"
+                stroke="url(#linearColors)"
+                stroke-width="8"
+                fill="transparent"
+                r="110"
+                cx="125"
+                cy="125"
+            />
+        </svg>
     </div>
 </body>
 </html>

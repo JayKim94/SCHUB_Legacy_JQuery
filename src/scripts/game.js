@@ -9,6 +9,10 @@ import globals from './globals.js';
 import { AnimateRocket, AnimateQuiz, AnimateUI } from './animations.js';
 import { Quiz } from './models/quiz.js';
 
+import CorrectSound from '../resources/correct.wav';
+import WrongSound from '../resources/wrong.mp3';
+import LevelUpSound from '../resources/level_up.mp3';
+
 //#region Constructor
 
 export function Game() {
@@ -20,7 +24,7 @@ Game.prototype.init = function() {
     this.isReady = false;
     this.isPaused = false;
     this.score = 0;
-    this.rocketSpeed = 10;
+    this.rocketSpeed = 0;
     this.maxSpeed = 0;
     this.quizCount = 0;
     this.submitCount = 0;
@@ -30,6 +34,25 @@ Game.prototype.init = function() {
     this.boostLevel = 1;
     this.openingAnimation = AnimateRocket.openingSequence();
     this.floatingAnimations = [];
+    this._updateProgress(this.boostGauge);
+
+    this.backgroundMusic = $('#bg_music');
+    this.backgroundMusic.trigger('load');
+    this.backgroundMusic.on('timeupdate', () => {
+        if (this.backgroundMusic[0].currentTime > 95)
+        {
+            this._backgroundMusic('pause');
+        };
+    });
+    this.backgroundMusic.on('loadedmetadata', () => {
+        console.log(this.backgroundMusic[0].duration);
+    });
+    this.backgroundMusic.attr('volume', 0);
+    this.backgroundMusic[0].pause();
+
+    this.correctSound = new Audio(CorrectSound);
+    this.wrongSound = new Audio(WrongSound);
+    this.levelUpSound = new Audio(LevelUpSound);
 }
 
 //#endregion
@@ -48,6 +71,10 @@ Game.prototype.ready = function() {
      */
    this.openingAnimation.pause();
    AnimateRocket.start();
+    /*
+     * spielt die Hintergrundmusik
+     */
+   this._backgroundMusic('play');
 }
 
 Game.prototype.start = function() {
@@ -62,21 +89,32 @@ Game.prototype.submit = function(playerAnswer) {
     /*
      * berechnet die erhaltene Punktzahl
      */
-    let deltaBoost, deltaScore;
+    let deltaBoost, deltaScore, deltaSpeed;
     if (isCorrect)
     {
         this.quizCount++;
         const score_base = 100;
         const score_combo = (Math.pow(this.combo, 2) * 100);
-        const score_speed = Math.floor(this.rocketSpeed / 100) * 125; 
+        const score_speed = Math.floor(this.rocketSpeed / 1000) * 125; 
 
-        deltaBoost = this.boostLevel > 1 ? 10 + this.combo * 3 : 30;
+        deltaBoost = 10 + this.combo * 3;
         deltaScore = score_base + score_combo + score_speed;
+        deltaSpeed = 250 + this.combo * 50;
+
+        this.correctSound.pause();
+        this.correctSound.currentTime = 0;
+        this.correctSound.play();
     }
     else
     {
         deltaBoost = 0;
         deltaScore = 0;
+        if (this.rocketSpeed > 25) deltaSpeed = -25;
+        else deltaSpeed = 0;
+
+        this.wrongSound.pause();
+        this.wrongSound.currentTime = 0;
+        this.wrongSound.play();
     }
     /*
      * aktualisiert und animiert entsprechend
@@ -84,16 +122,15 @@ Game.prototype.submit = function(playerAnswer) {
     this._updateCombo(isCorrect);
     this._updateScore(deltaScore);
     this._updateBoost(deltaBoost);
+    this._updateRocketSpeed(deltaSpeed);
     /*
      * animiert UI und Rocket
      */
     if (isCorrect) 
     {
         AnimateUI.correct(); 
-        AnimateRocket.flame();
-        
-        if (this.boostLevel > 1) AnimateRocket.smoke(0);
-        else AnimateRocket.shake();
+        AnimateRocket.flame(this.rocketSpeed);
+        AnimateRocket.smoke(0);
 
         this.showBoost();
         /*
@@ -109,10 +146,10 @@ Game.prototype.submit = function(playerAnswer) {
     {
         if ($('#circle').hasClass('_active')) $('#circle').removeClass('_active');
         AnimateUI.wrong();
-        AnimateRocket.smoke(.5);
+        AnimateRocket.smoke(.75);
         this.hideBoost();
     }
-    if (this.boostLevel > 1 && this.floatingAnimations.length == 0)
+    if (this.rocketSpeed > 0 && this.floatingAnimations.length == 0)
     {
         this.floatingAnimations.push(AnimateRocket.float_vertical());
         this.floatingAnimations.push(AnimateRocket.float_horizontal());
@@ -130,6 +167,7 @@ Game.prototype.pause = function() {
     this.isPaused = true;
     this.floatingAnimations.forEach(anim => anim.pause());
     globals.canvas.setVelocity({ x: 0 })
+    this._backgroundMusic('pause');
 }
 
 Game.prototype.continue = function() {
@@ -139,6 +177,7 @@ Game.prototype.continue = function() {
     this.isPaused = false;
     this.floatingAnimations.forEach(anim => anim.play());
     globals.canvas.setVelocity({ x: this.rocketSpeed / 1000 });
+    this._backgroundMusic('play');
 }
 
 Game.prototype.animateToNextQuiz = function() {
@@ -213,12 +252,23 @@ Game.prototype.getResult = function() {
 
 
 
+Game.prototype._backgroundMusic = function(action) {
+    if (action === 'play') 
+    {
+        this.backgroundMusic[0].play();
+        this.backgroundMusic.animate({volume: 1}, 1000);
+    }
+    else if (action === 'pause')
+    {
+        this.backgroundMusic.animate({volume: 0}, 1000, 'swing', () => {
+            this.backgroundMusic[0].pause();
+        });
+    }
+}
+
 Game.prototype._updateScore = function(score) {
     const prev = this.score;
     this.score += score;
-    
-    if (this.boostLevel > 1) $('#levelText').text(`STUFE ${this.boostLevel}`);
-
     /*
      * Score-bezogene Animationen
      */
@@ -253,12 +303,27 @@ Game.prototype._updateCombo = function(isCorrect) {
     }
 }
 
+Game.prototype._updateRocketSpeed = function(deltaSpeed) {
+    /*  
+     * erhöht und animiert aktuelle Geschwindigkeit
+     */
+    const prevSpeed = this.rocketSpeed;
+    this.rocketSpeed += deltaSpeed;
+    if (this.rocketSpeed > this.maxSpeed) this.maxSpeed = this.rocketSpeed;
+    AnimateUI.speedUp({ prev: prevSpeed, curr: this.rocketSpeed });
+    /*
+     * aktualisiert die Geschwindigkeit des Hintergrunds
+     */
+    console.log(this.rocketSpeed / 1000);
+    globals.canvas.setVelocity({ x: this.rocketSpeed / 1000 });
+}
+
 Game.prototype._updateBoost = function(boostAmount) {
     let prevBoost = this.boostGauge;
     this.boostGauge += boostAmount;
     /*
-    * Level-up ( boost 100% => nächste Stufe )
-    */
+     * Level-up ( boost 100% => nächste Stufe )
+     */
    if (this.boostGauge >= 100) 
     {
         this.boostLevel++;
@@ -266,20 +331,6 @@ Game.prototype._updateBoost = function(boostAmount) {
         $('#levelText').text(`STUFE ${this.boostLevel}`);
         AnimateUI.levelUp();
         prevBoost = 0;
-        /*
-         * erhöht und animiert aktuelle Geschwindigkeit
-         */
-        const bonusSpeed_base = 1250;
-        const bonusSpeed_combo = this.highestCombo * 500;
-        const prevSpeed = this.rocketSpeed;
-        this.rocketSpeed += bonusSpeed_base + bonusSpeed_combo;
-        if (this.rocketSpeed > this.maxSpeed) this.maxSpeed = this.rocketSpeed;
-        AnimateUI.speedUp({ prev: prevSpeed, curr: this.rocketSpeed });
-        /*
-         * aktualisiert die Geschwindigkeit des Hintergrunds
-         */
-        console.log(this.rocketSpeed / 1000);
-        globals.canvas.setVelocity({ x: this.rocketSpeed / 1000 });
         /*
          * skaliert die Flamme nach der aktuellen Stufe
          */
@@ -293,14 +344,25 @@ Game.prototype._updateBoost = function(boostAmount) {
         {
             $('.flame').addClass('_scale6');
         }
-        
+
+        setTimeout(() => this.levelUpSound.play(), 1000);
     }
     /*
      * animiert Boost
      */
     if (boostAmount > 0)
     {
+        this._updateProgress(this.boostGauge);
         AnimateUI.gaugeUp({ prev: prevBoost, curr: this.boostGauge });
     }
+}
+
+Game.prototype._updateProgress = function(percent) {
+    const circle = document.querySelector('.progress-ring circle');
+    const radius = circle.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
+    const offset = circumference - percent / 100 * circumference;
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = offset;
 }
 //#endregion

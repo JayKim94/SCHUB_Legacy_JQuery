@@ -4,7 +4,6 @@
 
 // Jawoon Kim PBT3H19A
 import anime from 'animejs/lib/anime.es.js';
-import globals from './globals';
 import { random } from './utils';
 
 export const AnimateRocket = {
@@ -23,13 +22,15 @@ export const AnimateRocket = {
             duration: 200,
         });
     },
-    flame: () => {
-        const speed = globals.game.rocketSpeed;
-        const ratio = speed / (speed + 100);
+    flame: (rocketSpeed) => {
+        let opacity = .25;
+        if (rocketSpeed > 10000) {opacity = .85}
+        else if (rocketSpeed > 5000) {opacity = .6}
+        else if (rocketSpeed > 1000) {opacity = .45}
         anime({
             targets: '.flame_wrapper',
             easing: 'easeOutExpo',
-            opacity: ratio,
+            opacity,
             duration: 500,
         });
     },
@@ -60,10 +61,10 @@ export const AnimateRocket = {
             complete: function(anim) {
                 anime({
                     targets: '#rocket_container',
-                    delay: 2000,
+                    delay: 1000,
                     easing: 'easeOutExpo',
                     left: '120%',
-                    duration: 5500,                    
+                    duration: 5500,
                 });
             },
         });
@@ -183,9 +184,12 @@ export const AnimateUI = {
         });
     },
     speedUp: ({prev, curr}) => {
+        const isDecreasing = prev >= curr;
         anime({
             targets: '#currentSpeed',
             innerHTML: [prev, curr],
+            color: isDecreasing ?
+             ['#ff2281', '#ff2281', '#EFEFEF'] : ['#33CCFF', '#33CCFF', '#EFEFEF'],
             duration: 1500,
             easing: 'easeOutCirc',
             round: 1,

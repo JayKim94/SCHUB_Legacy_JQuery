@@ -62,7 +62,6 @@ div#overlay_container {
         font-size: 8rem;
         width: fit-content;
         text-align: center;
-        background-color: transparent;
         opacity: 1;
 
         &.wrong {
@@ -71,6 +70,20 @@ div#overlay_container {
 
         &.correct {
             @include glow($neon_blue);
+        }
+    }
+
+    .progress-ring {
+        @include setPosition(50%, 65%);
+        z-index: 50;
+
+        & * {@include transform(translate(0, 0));}
+
+        circle {
+            stroke-dasharray: 10 20;
+            transition: stroke-dashoffset 350ms;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
         }
     }
 
@@ -95,7 +108,7 @@ div#overlay_container {
             animation: rotateFull 10000ms linear infinite;
             border-radius: 50%;
             filter: grayscale(1);
-            transition: filter 5000ms;
+            transition: filter 1000ms ease-out;
             &._active { filter: none; }
             background: radial-gradient(transparent, transparentize($neon_blue, 0.5), transparentize($neon_red, 0.5));
             &::after {
@@ -191,6 +204,7 @@ div#overlay_container {
             font-size: 1rem;
             font-weight: 100;
             opacity: .15;
+            text-shadow: none;
         }
     }
 }

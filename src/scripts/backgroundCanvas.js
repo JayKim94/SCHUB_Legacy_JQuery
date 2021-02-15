@@ -54,10 +54,29 @@ BackgroundCanvas.prototype.update = function() {
     this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
     // takes radians (360° = 2 * Math.PI)
     this.ctx.rotate(this.backgroundRotateRadians);
-    if (this.isRotating && this.backgroundRotateRadians > 0) this.backgroundRotateRadians += this.rotateValue;
-    if (this.backgroundRotateRadians >= 2 * Math.PI) this.backgroundRotateRadians = 0;
-
-    // draw stars
+    if (this.isRotating && this.backgroundRotateRadians > 0) 
+    {
+        this.backgroundRotateRadians += this.rotateValue;
+    }
+    if (this.backgroundRotateRadians >= 2 * Math.PI) 
+    {
+        this.backgroundRotateRadians = 0;
+    }
+    /* 
+     * beschleunigt sich, wenn sich zurücksetzt
+     */
+    if (this.isResetting)
+    {
+        this.rotateValue *= 1.01;
+        if (this.backgroundRotateRadians <= 0)
+        {
+            this.backgroundRotateRadians = 0;
+            this.isResetting = false;
+        }
+    }
+    /*
+     * zeichnet Sterne
+     */
     this.stars.forEach((star) => {
         if (star.x < -this.drawWidth) {
             star.reset(this._getRandomStar(this.drawWidth));
@@ -80,20 +99,6 @@ BackgroundCanvas.prototype.draw = function() {
 BackgroundCanvas.prototype.resetRotation = function() {
     this.isResetting = true;
     this.rotateValue = -(this.rotateValue + 0.001);
-}
-
-BackgroundCanvas.prototype.resetVelocity = function() {
-    const division = 100;
-    let lerpAmount = Math.floor(this.currentVelocity / division);
-    if (lerpAmount <= 0) lerpAmount = 1; 
-    for (let i = 0; i < division; i++)
-    {
-        setTimeout(() => {
-            this.currentVelocity -= lerpAmount;
-            if (this.currentVelocity < 0) this.currentVelocity = 0;
-            this.stars.forEach(star => { star.velocity.x = this.currentVelocity; })
-        }, 10 * i);
-    }
 }
 
 BackgroundCanvas.prototype.setBackgroundAlpha = function(alpha) {

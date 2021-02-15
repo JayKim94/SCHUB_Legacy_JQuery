@@ -39,8 +39,21 @@ module.exports = {
                         loader: 'file-loader',
                         options: {
                             name: '[name].[ext]',
-                            outputPath: 'img/',
-                            publicPath: 'img/'
+                            outputPath: 'resources/',
+                            publicPath: 'resources/'
+                        }
+                    }
+                ]
+            },
+            {
+                test: /\.(wav|mp3)$/i,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]',
+                            outputPath: 'resources/',
+                            publicPath: 'resources/'
                         }
                     }
                 ]

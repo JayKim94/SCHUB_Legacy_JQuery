@@ -5,7 +5,11 @@
 // Jawoon Kim PBT3H19A
 import $ from 'jquery';
 import { AnimateScoreboard } from './animations.js';
+import { Game } from './game.js';
 import globals from './globals.js';
+import RocketImage from '../resources/rocket.svg';
+import LogoImage from '../resources/bib_transparent.png';
+import ProgressSVG from '../resources/progress_circle.svg';
 
 export function UI() {
     this.init();
@@ -14,13 +18,17 @@ export function UI() {
 UI.prototype.init = function() {
     this.isPaused = false;
     this.isDialogOpen = false;
-    this._showIntroScreen();
     /*
-    * initialisiert Timer
-    */
+     * initialisiert Timer
+     */
     this.timerID = null;
-    this.timeLeft = 30;
-
+    this.timeLimit = 60;
+    this.timeLeft = 60;
+    /*
+     * initialisiert das Spiel
+     */
+    this._showIntroScreen();
+    this.game = new Game();
     globals.ready = false;
 }
 
@@ -34,20 +42,25 @@ UI.prototype._showIntroScreen = function() {
      */
     this._widget({ tag: 'div', id: 'menu' })
         .append(this._widget({ tag: 'h1' }).text('SCHUB!'))
-        .append(this._widget({ tag: 'p' }).text('Entwickelt von Jawoon Kim'))
+        .append(this._widget({ tag: 'p' }).text('Entwickelt von Jay Kim'))
         .append(this._widget({ tag: 'button', id: 'start' })
             .text('START')
             .on('click', () => this._onClickStart()))
         .append(this._widget({ tag: 'button', id: 'tutorial' })
             .text('TUTORIAL')
             .on('click', () => {}))
+        .append(this._widget({ tag: 'img', id: 'bibLogo' })
+                .attr('src', LogoImage)
+                .on('click', () => {
+                    window.open('https://www.bib.de/', '_blank')
+                }))
         .appendTo('#spiel_body');
     /*
      * Rocket SVG + Flamme + Rauch
      */
     this._widget({ tag: 'div', id: 'rocket_container'})
         .append(this._widget({ tag: 'img', id: 'rocket' })
-            .attr('src', 'img/rocket.svg')
+            .attr('src', RocketImage)
             .attr('alt', 'rocket'))
         .append(this._buildFlame())
         .append(this._widget({ tag: 'div', className: 'smoke_wrapper' })
@@ -73,7 +86,7 @@ UI.prototype._showInGameScreen = function() {
     /*
      * Timer (oben mitte)
      */
-    this._widget({ tag: 'div', id: 'timer', className: 'in_game_ui' })
+    this._widget({ tag: 'div', id: 'timer' })
         .append(this._widget({ tag: 'p', id: 'timer_num' }))
         .append(this._widget({ tag: 'p', id: 'timer_tag' }).text('Verbleibende Zeit'))
         .appendTo('#overlay_container');
@@ -83,6 +96,7 @@ UI.prototype._showInGameScreen = function() {
     this._widget({tag: 'button', id: 'pause', className: 'in_game_ui' })
         .text('PAUSE')
         .on('click', (e) => this._onClickPause())
+        .hide()
         .appendTo('#overlay_container');
     /*
      * Eingabefeld (mitte)
@@ -97,6 +111,7 @@ UI.prototype._showInGameScreen = function() {
         .appendTo('#overlay_container');
     this._widget({ tag: 'div', id: 'answer', className: 'in_game_ui' })
         .appendTo('#overlay_container');
+    $('.progress-ring').animate({opacity: 1});
     /*
      * Status (unten mitte)
      */
@@ -116,23 +131,30 @@ UI.prototype._showInGameScreen = function() {
 UI.prototype._showPausedScreen = function() {
     if (!this.isDialogOpen)
     {
-        /* Sperrt Events */
+        /*
+         * Sperrt Events
+         */
         globals.ready = false;
-        // blendet die Aufgabe aus
+        /*
+         * blendet das Quiz aus
+         */
         $('.op').addClass('blurred');
-        // baut Pause-screen
+        /*
+         * baut Pause-Screen
+         */
         this._widget({ tag: 'div', id: 'dialog' })
             .append(this._widget({ tag: 'h1', className: 'title-text' })
                 .text('PAUSE'))
-            // zum Fortfahren
             .append(this._widget({ tag: 'button' }).text('WEITER')
                 .on('click', () => {
+                    /*
+                     * setzt fort
+                     */
                     $('#dialog').remove();
+                    $('.op').removeClass('blurred');
                     this.isDialogOpen = false;
                     this.isPaused = false;
-                    // setzt fort
-                    $('.op').removeClass('blurred');
-                    globals.game.continue();
+                    this.game.continue();
                     globals.ready = true;
                 }))
             .appendTo('#spiel_body');
@@ -146,59 +168,79 @@ UI.prototype._showPausedScreen = function() {
 }
 
 UI.prototype._showOutroScreen = function() {
-    const { score, maxSpeed, quizCount, accuracy } = globals.game.getResult();
-
-    globals.canvas.setVelocity({x: 1});
-    $('#rocket_container').fadeOut(() => $('rocket_container').remove());
-    this._widget({ tag: 'div', id: 'earth_container'})
+    $('#rocket_container').remove();
+    /*
+     * holt das Ergebnis der Runde
+     */
+    const { score, maxSpeed, quizCount, accuracy } = this.game.getResult();
+    /*
+     * verlangsamt den Hintergrund
+     */
+    globals.canvas.setVelocity({ x: 1 });
+    /*
+     * baut die Erde und Rakete
+     */
+    this._widget({ tag: 'div', id: 'earth_container', className: 'outro_ui' })
         .append(this._widget({ tag: 'div', id: 'rocket_orbit' })
-            .append(this._widget({ tag: 'img' })
-            .attr('src', 'img/rocket.svg')
+            .append(this._widget({ tag: 'img', className: 'outro_ui' })
+            .attr('src', RocketImage)
             .attr('alt', 'Rocket')
             .css({ width: '90px' }))
             .append(this._buildFlame()))
         .append(this._widget({ tag: 'div', id: 'earth' }))
-        .css({ left: innerWidth + 200 })
+        .css({ left: innerWidth + 300 })
         .appendTo('#overlay_container')
         .animate({ left: '50%' }, 40000, 'linear');
-
-
+    /*  
+     * zeigt die Anzeigetafel an (nach 3 Sekunden)
+     */
+    const delay = 0;
     setTimeout(() => {
-        this._widget({ tag: 'div', id: 'menu' })
+        this._widget({ tag: 'div', id: 'menu', className: 'outro_ui' })
             .append(this._widget({ tag: 'h1' }).text('SCHUB!')
                 .addClass('outro'))
-            .appendTo('#spiel_body');
-        this._buildScoreboard()
+            .append(this._widget({ tag: 'img', id: 'bibLogo' })
+                .attr('src', LogoImage)
+                .on('click', () => {
+                    window.open('https://www.bib.de/', '_blank')
+                }))
+            .append(this._buildScoreboard())
+            .append(this._widget({ tag: 'button', id: 'retryBtn' })
+                .text('Retry')
+                .on('click', () => this._onRetry() ))
             .hide()
-            .appendTo('#menu')
-            .fadeIn(3000);
+            .appendTo('#spiel_body')
+            .fadeIn(5000);
         AnimateScoreboard.numbers({target: '#finalScore', value: score });
         AnimateScoreboard.numbers({target: '#maxSpeed', value: maxSpeed });
         AnimateScoreboard.numbers({target: '#quizCount', value: quizCount });
         AnimateScoreboard.numbers({target: '#accuracy', value: accuracy });
-    }, 3000)
+    }, delay)
 }
 
 UI.prototype._buildScoreboard = function() {
     /*
      * baut Anzeigetafel
      */ 
+    const board = this._widget({ tag: 'div', className: 'scoreboard' });
     const scores = this._widget({ tag: 'div', className: 'scores'});
     const scorebox_1 = this._widget({ tag: 'div', className: 'scorebox' });
     const scorebox_2 = this._widget({ tag: 'div', className: 'scorebox' });
     const scorebox_3 = this._widget({ tag: 'div', className: 'scorebox' });
+
     scorebox_1.append(this._widget({ tag: 'p', className: 'label' }).text('Treffsicherheit'));
     scorebox_1.append(this._widget({ tag: 'p', className: 'numbers', id: 'accuracy' }).text('0'));
     scorebox_2.append(this._widget({ tag: 'p', className: 'label' }).text('Max. Geschwindigkeit'));
     scorebox_2.append(this._widget({ tag: 'p', className: 'numbers', id: 'maxSpeed' }).text('0'));
     scorebox_3.append(this._widget({ tag: 'p', className: 'label' }).text('Gelöste Aufgaben'));
     scorebox_3.append(this._widget({ tag: 'p', className: 'numbers', id: 'quizCount' }).text('0'));
+    
     scores.append(scorebox_1, scorebox_2, scorebox_3);
 
-    const board = this._widget({ tag: 'div', className: 'scoreboard' });
     board.append(this._widget({ tag: 'p', className: 'label', id: 'finalLabel' }).text('Erhaltene Punkte'));
     board.append(this._widget({ tag: 'p', className: 'numbers', id: 'finalScore' }).text('0'));
     board.append(scores);
+
     return board;
 }
 
@@ -220,20 +262,26 @@ UI.prototype._startTimer = function() {
          * bis zum 0 Sek.
          */
         this.timeLeft--;
-        if (this.timeLeft > 0) 
+        if (this.timeLeft >= 0) 
         {
             $('#timer_num').text(`${this.timeLeft}`);
         }
         else 
         {
             globals.ready = false;
-            $('.in_game_ui').fadeOut(2000);
+            $(document).off('keydown');
+            $('.in_game_ui').fadeOut(2000, 'linear', () => {
+                $('.in_game_ui').remove();
+            });
             /*
-            * entfernt Interval-Event
-            */
+             * entfernt Interval-Event
+             */
            clearInterval(this.timerID);
-           globals.game.animateOutro();
-           setTimeout(() => this._showOutroScreen(), 5000);
+           this.game.animateOutro();
+           setTimeout(() => {
+               $('#timer').fadeOut(1000, 'linear', () => $('#timer').remove()); 
+               this._showOutroScreen();
+            }, 5000);
         }
         /*
          * Warnung! ( unter 10 Sek. )
@@ -243,9 +291,12 @@ UI.prototype._startTimer = function() {
 }
 
 UI.prototype._onClickPause = function() {
+    /*
+     * Pause
+     */
     this.isPaused = true;
     this._showPausedScreen();
-    globals.game.pause();
+    this.game.pause();
 }
 
 UI.prototype._onClickStart = function() {
@@ -254,18 +305,18 @@ UI.prototype._onClickStart = function() {
      */
     $('#menu').fadeOut(() => $('#menu').remove());
     this._showInGameScreen();
+    this.timeLeft = this.timeLimit;
     $('#timer_num').text(`${this.timeLeft}`);
     /*
      * Eingabe-Event
      */
     $(document).on('keydown', (e) => this._onKeyDown(e));
-
     /*
      * stellt nötige Html-Elemente bereit
      */
     this._widget({ tag: 'div', id: 'countdown' })
         .appendTo('#overlay_container');
-    globals.game.ready();
+    this.game.ready();
     this._appendNextQuiz();
     this._buildCountdown();
 }
@@ -278,13 +329,13 @@ UI.prototype._onSubmit = function() {
     setTimeout(() => { globals.ready = true; }, buffer);
 
     const playerAnswer = $('#answer').text();
-    const isCorrect = globals.game.submit(playerAnswer);
+    const isCorrect = this.game.submit(playerAnswer);
     
     if (isCorrect)
     {
         $('answer').text('');
         this._appendNextQuiz();
-        globals.game.animateToNextQuiz();
+        this.game.animateToNextQuiz();
     }
     else 
     {
@@ -292,12 +343,18 @@ UI.prototype._onSubmit = function() {
     }
 }
 
+UI.prototype._onRetry = function() {
+    $('.outro_ui').remove();
+    this._showIntroScreen();
+    this.game = new Game();
+}
+
 //#endregion
 
 //#region Helpers
 
 UI.prototype._appendNextQuiz = function() {
-    globals.game.getNextQuizMap().forEach((val, key) => 
+    this.game.getNextQuizMap().forEach((val, key) => 
     {
         this._widget({ tag: 'div', className: `op ${key} active` })
             .attr('value', val)
@@ -313,7 +370,7 @@ UI.prototype._onKeyDown = function(e) {
     if (this._isValidToWrite(key)) 
     {
         $('#answer').append(key);
-        globals.game.hideBoost();
+        this.game.hideBoost();
     }
     else if (this._isSubmit(key)) 
     {
@@ -329,7 +386,7 @@ UI.prototype._onKeyDown = function(e) {
         /*
          * zeigt "Boost Gauge" an
          */
-        if ($('#answer').text().length == 0) globals.game.showBoost();
+        if ($('#answer').text().length == 0) this.game.showBoost();
     }
 }
 
@@ -351,6 +408,7 @@ UI.prototype._isClear = function(key) {
     return key === 'Backspace';
 }
 
+
 UI.prototype._buildCountdown = function() {
     /*
      * Countdown
@@ -363,10 +421,15 @@ UI.prototype._buildCountdown = function() {
     setTimeout(() => 
     { 
         countdown.remove();
+        const fadeDuration = 1500;
+        /*
+         * zeigt die Pause-Taste an
+         */
+        $('#pause').show();
         /*
          * zeigt das Eingabefeld an
          */
-        $('#answer_field').fadeIn(1500);
+        $('#answer_field').fadeIn(fadeDuration);
         /*
          * Timer
          */
@@ -374,7 +437,7 @@ UI.prototype._buildCountdown = function() {
         /*
          * startet die Runde
          */
-        globals.game.start();
+        this.game.start();
     }, DELAY * 4);
 }
 

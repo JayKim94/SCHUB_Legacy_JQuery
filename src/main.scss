@@ -104,15 +104,15 @@ div#menu {
         }
 
         #finalScore {
-            @include glow($neon_blue);
+            color: $neon_blue;
+            animation: glowing 1000ms infinite alternate;
             font-size: 5rem;
             margin: 10px 0 30px 0;
         }
 
         $unit: 1.25rem;
-        #maxSpeed::after { content: 'km/s'; font-size: $unit; text-shadow: none; }
-        #accuracy::after { content: '%'; font-size: $unit; text-shadow: none; }
-        #quizCount::after { content: ' Aufgaben'; font-size: $unit; text-shadow: none; }
+        #maxSpeed::after { content: 'km/s'; font-size: $unit; color: $text_primary; text-shadow: none; }
+        #accuracy::after { content: '%'; font-size: $unit; color: $text_primary; text-shadow: none; }
 
         .label {
             margin-top: 10px;
@@ -124,10 +124,22 @@ div#menu {
         
         .numbers {
             margin-top: 10px;
-            @include glow(transparentize($primary_yellow, 0.3));
+            @include glow(transparentize($neon_red, 0.3));
             font-size: 2.5rem;
             opacity: 1;
         }
+    }
+
+    #retryBtn {
+        @include setPosition(50%, 80%);
+    }
+
+    #bibLogo {
+        @include setPosition(150px, 90%);
+        width: 175px;
+        opacity: .25;
+        cursor: pointer;
+        &:hover { opacity: 1; }
     }
 }
 
@@ -277,7 +289,7 @@ div#dialog {
         z-index: -1;
         width: $earth_size;
         height: $earth_size;
-        background: url(img/earth.jpg);
+        background: url(resources/earth.jpg);
         border-radius: 50%;
         background-size: cover;
         box-shadow: 

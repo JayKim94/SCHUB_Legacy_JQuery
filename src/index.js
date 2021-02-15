@@ -7,8 +7,7 @@ import { Game } from './scripts/game';
 
 $(function() {
     globals.canvas = new BackgroundCanvas();
-    const ui = new UI();
-    globals.game = new Game();
+    new UI();
     animateBackgroundCanvas();
 });
 
