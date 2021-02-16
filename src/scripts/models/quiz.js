@@ -20,6 +20,9 @@ Quiz.prototype.answer = function() {
         case '*':
             res = this.op1 * this.op2;
             break;
+        case '÷':
+            res = this.op1 / this.op2;
+            break;
         default:
             res = undefined;
             break;             
@@ -29,20 +32,81 @@ Quiz.prototype.answer = function() {
 Quiz.prototype.next = function() {
     this.op1 = this.answer();
     this.op2 = random(1, 9);
-    if (this.op1 > 30) {
-        const chanceForPlus = .15;
-        if (Math.random() < chanceForPlus) this.operator = '+';
-        else this.operator = '-';
+    if (this.op1 > 50) {
+        const chanceForDiv = .55;
+        const roll = Math.random();
+        if (roll < chanceForDiv && this.op1 % 5 == 0)
+        {
+            this.operator = '÷';
+            this.op2 = 5;
+        }
+        else if (roll < chanceForDiv && this.op1 % 3 == 0)
+        {
+            this.operator = '÷';
+            this.op2 = 3;
+        }
+        else
+        {
+            this.operator = '-';
+            this.op2 = random(5, 9);
+        }
     }
-    else if (this.op1 > 10) {
-        const chanceForPlus = .35;
-        if (Math.random() < chanceForPlus) this.operator = '+';
-        else this.operator = '-';
+    else if (this.op1 > 30) {
+        const chanceForPlus = .45;
+        if (this.op1 % 5 == 0)
+        {
+            this.operator = '÷';
+            this.op2 = 5;
+        }
+        else if (Math.random() < chanceForPlus) 
+        {
+            this.operator = '+';
+            this.op2 = random(2, 6);
+        }
+        else 
+        {
+            this.operator = '-';
+            this.op2 = random(7, 9);
+        }
+    }
+    else if (this.op1 >= 10) {
+        const chanceForPlus = .45;
+        const chanceForDiv = .35;
+        const chanceForMulti = .25;
+        const roll = Math.random();
+        if (roll < chanceForDiv && this.op1 % 3 == 0)
+        {
+            this.operator = '÷';
+            this.op2 = 3;
+        }
+        else if (roll < chanceForMulti && this.op1 < 15)
+        {
+            this.op2 = random(2, 5);
+        }
+        else if (roll < chanceForPlus) 
+        {
+            this.operator = '+';
+            this.op2 = random(3, 9);
+        }
+        else 
+        {
+            this.operator = '-';
+            this.op2 = random(4, 9);
+        };
     }
     else {
-        const chanceForMulti = 1;
-        if (Math.random() < chanceForMulti) this.operator = '*';
-        else this.operator = '+';
+        const chanceForMulti = .55;
+        const roll = Math.random();
+        if (roll < chanceForMulti) 
+        {
+            this.operator = '*';
+            this.op2 = random(2, 7);
+        }
+        else 
+        {
+            this.operator = '+'
+            this.op2 = random(5, 9);
+        };
     }
     return this;
 }

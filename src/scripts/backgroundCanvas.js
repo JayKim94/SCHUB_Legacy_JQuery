@@ -7,11 +7,11 @@ import { Star } from './models/star.js';
 import { random } from './utils.js';
 
 //#region Constructor
-export function BackgroundCanvas() {
+export default function BackgroundCanvas() {
     this.backgroundRotateRadians = 0.001;
     this.backgroundAlpha = 0.98;
     this.starsCount = 300;
-    this.rotateValue = 0.0005;
+    this.rotateValue = 0.0002;
     this.currentVelocity = 0;
     this.stars = [];
     this.isRotating = false;
@@ -21,12 +21,10 @@ export function BackgroundCanvas() {
 //#endregion
 //#region Methoden
 BackgroundCanvas.prototype.init = function() {
-    const spielDiv = document.getElementById('spiel_body');
-    this.canvas = document.createElement('canvas');
-    spielDiv.appendChild(this.canvas);
+    this.canvas = document.getElementById('backgroundCanvas');
     this.ctx = this.canvas.getContext('2d');
-    this.canvas.width = spielDiv.offsetWidth;
-    this.canvas.height = spielDiv.offsetHeight;
+    this.canvas.width = innerWidth;
+    this.canvas.height = innerHeight;
     this.drawWidth = (this.canvas.width + 1600) / 2;
     this.drawHeight = (this.canvas.height + 1000) / 2;
     this.isRotating = true;
@@ -67,7 +65,7 @@ BackgroundCanvas.prototype.update = function() {
      */
     if (this.isResetting)
     {
-        this.rotateValue *= 1.01;
+        this.rotateValue *= 1.025;
         if (this.backgroundRotateRadians <= 0)
         {
             this.backgroundRotateRadians = 0;

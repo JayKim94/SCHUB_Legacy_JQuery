@@ -1,14 +1,23 @@
 import './main.scss';
 import $ from 'jquery';
-import { UI } from './scripts/ui.js';
+import UI from './scripts/ui.js';
+import BackgroundCanvas from './scripts/backgroundCanvas.js';
 import globals from './scripts/globals.js';
-import { BackgroundCanvas } from './scripts/backgroundCanvas.js';
-import { Game } from './scripts/game';
 
 $(function() {
+    /*
+     * zeichnet und animiert den Hintergrund
+     */
     globals.canvas = new BackgroundCanvas();
-    new UI();
     animateBackgroundCanvas();
+    /*
+     * initialisiert die Benutzeroberfläche
+     */
+    new UI().init();
+    /*
+     * zeichnet neu, wenn skaliert
+     */
+    $(window).on('resize', () => globals.canvas.init());
 });
 
 function animateBackgroundCanvas() {

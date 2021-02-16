@@ -76,6 +76,7 @@ div#overlay_container {
     .progress-ring {
         @include setPosition(50%, 65%);
         z-index: 50;
+        animation: rotateWithoutScale 10s linear infinite;
 
         & * {@include transform(translate(0, 0));}
 
@@ -107,7 +108,7 @@ div#overlay_container {
             transform-origin: center;
             animation: rotateFull 10000ms linear infinite;
             border-radius: 50%;
-            filter: grayscale(1);
+            filter: grayscale(.75);
             transition: filter 1000ms ease-out;
             &._active { filter: none; }
             background: radial-gradient(transparent, transparentize($neon_blue, 0.5), transparentize($neon_red, 0.5));

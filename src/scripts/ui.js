@@ -9,13 +9,15 @@ import { Game } from './game.js';
 import globals from './globals.js';
 import RocketImage from '../resources/rocket.svg';
 import LogoImage from '../resources/bib_transparent.png';
-import ProgressSVG from '../resources/progress_circle.svg';
+import CountSound from '../resources/count.wav';
+import { Quiz } from './models/quiz.js';
 
-export function UI() {
-    this.init();
+export default function UI() {
+    return this;
 }
 
 UI.prototype.init = function() {
+    this.countSound = new Audio(CountSound);
     this.isPaused = false;
     this.isDialogOpen = false;
     /*
@@ -48,7 +50,7 @@ UI.prototype._showIntroScreen = function() {
             .on('click', () => this._onClickStart()))
         .append(this._widget({ tag: 'button', id: 'tutorial' })
             .text('TUTORIAL')
-            .on('click', () => {}))
+            .on('click', () => this._showTutorialScreen()))
         .append(this._widget({ tag: 'img', id: 'bibLogo' })
                 .attr('src', LogoImage)
                 .on('click', () => {
@@ -128,6 +130,48 @@ UI.prototype._showInGameScreen = function() {
         .appendTo('#overlay_container');
 }
 
+UI.prototype._showTutorialScreen = function() {
+    if (!this.isDialogOpen)
+    {
+        /*
+         * Sperrt Events
+         */
+        globals.ready = false;
+        /*
+         * blendet das Quiz aus
+         */
+        $('#menu').addClass('blurred');
+        $('#rocket_container').addClass('blurred');
+        /*
+         * baut Pause-Screen
+         */
+        this._widget({ tag: 'div', id: 'dialog' })
+            .append(this._widget({ tag: 'h1', className: 'title-text' })
+                .text('Spielregeln'))
+            .append(this._widget({ tag: 'p', className: 'tutorial-text' })
+                .html(
+                    `Unsere <span class="accent_red">kleine Rakete</span> braucht etwas Hilfe dabei,
+                     sich wieder <span class="accent_blue">auf die Erde</span> zurückzukehren!
+                     
+                     Lös die Aufgaben und gib ihr Kraft!`))
+            .append(this._widget({ tag: 'button', className: 'tutorial-button' })
+                .text(`Zurück`)
+                .on('click', () => {
+                    $('#menu').removeClass('blurred');
+                    $('#rocket_container').removeClass('blurred');
+                    $('#dialog').remove();
+                    this.isDialogOpen = false;
+                }))
+            .appendTo('#spiel_body');
+
+        this.isDialogOpen = true;
+    }
+    else
+    {
+        console.warn(`Es kann nicht mehr als ein Dialog geöffnet werden.`);
+    }
+}
+
 UI.prototype._showPausedScreen = function() {
     if (!this.isDialogOpen)
     {
@@ -157,6 +201,18 @@ UI.prototype._showPausedScreen = function() {
                     this.game.continue();
                     globals.ready = true;
                 }))
+            .append(this._widget({ tag: 'button', id: 'retryBtn' })
+                .text('ZURÜCK')
+                .on('click', () => {
+                    $('#dialog').remove();
+                    $('.op')?.remove();
+                    $('#timer')?.remove();
+                    $('#rocket_container')?.remove();
+                    clearInterval(this.timerID);
+                    this.isDialogOpen = false;
+                    this.isPaused = false;
+                    this._onRetry();
+                }))
             .appendTo('#spiel_body');
 
         this.isDialogOpen = true;
@@ -177,6 +233,7 @@ UI.prototype._showOutroScreen = function() {
      * verlangsamt den Hintergrund
      */
     globals.canvas.setVelocity({ x: 1 });
+    globals.canvas.setBackgroundAlpha(0.98);
     /*
      * baut die Erde und Rakete
      */
@@ -206,7 +263,7 @@ UI.prototype._showOutroScreen = function() {
                 }))
             .append(this._buildScoreboard())
             .append(this._widget({ tag: 'button', id: 'retryBtn' })
-                .text('Retry')
+                .text('Zurück')
                 .on('click', () => this._onRetry() ))
             .hide()
             .appendTo('#spiel_body')
@@ -262,24 +319,31 @@ UI.prototype._startTimer = function() {
          * bis zum 0 Sek.
          */
         this.timeLeft--;
-        if (this.timeLeft >= 0) 
+        if (this.timeLeft >= 0)
         {
+            if (this.timeLeft < 4) 
+            {
+                this._playBeep();
+            }
+
             $('#timer_num').text(`${this.timeLeft}`);
         }
         else 
         {
             globals.ready = false;
-            $(document).off('keydown');
             $('.in_game_ui').fadeOut(2000, 'linear', () => {
                 $('.in_game_ui').remove();
             });
+            $('.progress-ring').animate({opacity: 0}, 2000);
             /*
              * entfernt Interval-Event
              */
            clearInterval(this.timerID);
            this.game.animateOutro();
            setTimeout(() => {
-               $('#timer').fadeOut(1000, 'linear', () => $('#timer').remove()); 
+               $('#timer').fadeOut(500, 'linear', () => $('#timer').remove())
+            }, 2500);
+           setTimeout(() => {
                this._showOutroScreen();
             }, 5000);
         }
@@ -301,6 +365,10 @@ UI.prototype._onClickPause = function() {
 
 UI.prototype._onClickStart = function() {
     /*
+     * verhindert mehrmalige Klicken
+     */
+    $('#start').off('click');
+    /*
      * wechselt die Szene
      */
     $('#menu').fadeOut(() => $('#menu').remove());
@@ -310,10 +378,12 @@ UI.prototype._onClickStart = function() {
     /*
      * Eingabe-Event
      */
+    $(document).off('keydown');
     $(document).on('keydown', (e) => this._onKeyDown(e));
     /*
      * stellt nötige Html-Elemente bereit
      */
+    this.game.currentQuiz = new Quiz();
     this._widget({ tag: 'div', id: 'countdown' })
         .appendTo('#overlay_container');
     this.game.ready();
@@ -336,6 +406,12 @@ UI.prototype._onSubmit = function() {
         $('answer').text('');
         this._appendNextQuiz();
         this.game.animateToNextQuiz();
+        /*
+         * blendet auf dem Antwortfeld in Prozent ein
+         */
+        const baseOpacity = 0.05;
+        const addedOpacity = baseOpacity + (this.game.boostGauge / 500);
+        $('#boostGauge').fadeTo(300, addedOpacity);
     }
     else 
     {
@@ -344,9 +420,19 @@ UI.prototype._onSubmit = function() {
 }
 
 UI.prototype._onRetry = function() {
-    $('.outro_ui').remove();
+    globals.canvas.setVelocity({x: 0});
+    globals.canvas.rotate();
+
+    const outro = $('.outro_ui');
+    const inGame = $('.in_game_ui');
+    
+    outro?.remove();
+    inGame?.remove();
+
     this._showIntroScreen();
-    this.game = new Game();
+    this.game.backgroundMusic[0].pause();
+    this.game.backgroundMusic[0].currentTime = 0;
+    this.game.init();
 }
 
 //#endregion
@@ -354,7 +440,15 @@ UI.prototype._onRetry = function() {
 //#region Helpers
 
 UI.prototype._appendNextQuiz = function() {
-    this.game.getNextQuizMap().forEach((val, key) => 
+    if (this.game.currentQuiz == null)
+    {
+        this.game.currentQuiz = new Quiz();
+    }
+    else
+    {
+        this.game.currentQuiz.next();    
+    }
+    this.game.currentQuiz.currentMap().forEach((val, key) => 
     {
         this._widget({ tag: 'div', className: `op ${key} active` })
             .attr('value', val)
@@ -369,8 +463,13 @@ UI.prototype._onKeyDown = function(e) {
     const { key } = e;
     if (this._isValidToWrite(key)) 
     {
-        $('#answer').append(key);
-        this.game.hideBoost();
+        if (key == '0' && $('#answer').text().length < 1) {
+            console.log('Null');
+        } else $('#answer').append(key);
+        /*
+         * blendet aus dem Antwortfeld aus
+         */
+        $('#boostGauge').fadeTo(150, 0.0);
     }
     else if (this._isSubmit(key)) 
     {
@@ -386,7 +485,15 @@ UI.prototype._onKeyDown = function(e) {
         /*
          * zeigt "Boost Gauge" an
          */
-        if ($('#answer').text().length == 0) this.game.showBoost();
+        if ($('#answer').text().length == 0) 
+        {
+            /*
+             * blendet auf dem Antwortfeld in Prozent ein
+             */
+            const baseOpacity = 0.05;
+            const addedOpacity = baseOpacity + (this.game.boostGauge / 500);
+            $('#boostGauge').fadeTo(300, addedOpacity);
+        }
     }
 }
 
@@ -415,9 +522,9 @@ UI.prototype._buildCountdown = function() {
      */
     const DELAY = 1000;
     const countdown = $('#countdown');
-    setTimeout(() => { countdown.text('3').fadeIn(); }, DELAY);
-    setTimeout(() => { countdown.text('2'); countdown.addClass('_2'); }, DELAY * 2);
-    setTimeout(() => { countdown.text('1'); countdown.addClass('_1'); }, DELAY * 3);
+    setTimeout(() => { countdown.text('3').fadeIn(); this._playBeep(); }, DELAY);
+    setTimeout(() => { countdown.text('2'); countdown.addClass('_2'); this._playBeep(); }, DELAY * 2);
+    setTimeout(() => { countdown.text('1'); countdown.addClass('_1'); this._playBeep(); }, DELAY * 3);
     setTimeout(() => 
     { 
         countdown.remove();
@@ -460,6 +567,11 @@ UI.prototype._buildFlame = function() {
 
 UI.prototype._widget = function({tag, id, className}) {
     return $(`<${tag} id="${id ?? ''}" class="${className ?? ''}"></${tag}>`);
+}
+
+UI.prototype._playBeep = function() {
+    this.countSound.currentTime = 0;
+    this.countSound.play();
 }
 
 //#endregion

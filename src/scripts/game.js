@@ -12,11 +12,13 @@ import { Quiz } from './models/quiz.js';
 import CorrectSound from '../resources/correct.wav';
 import WrongSound from '../resources/wrong.mp3';
 import LevelUpSound from '../resources/level_up.mp3';
+import BackgroundMusic from '../resources/background_music.mp3';
 
 //#region Constructor
 
 export function Game() {
     this.currentQuiz;
+    this.backgroundMusic;
     this.init();
 }
 
@@ -36,21 +38,16 @@ Game.prototype.init = function() {
     this.floatingAnimations = [];
     this._updateProgress(this.boostGauge);
 
-    this.backgroundMusic = $('#bg_music');
-    this.backgroundMusic.trigger('load');
-    this.backgroundMusic.on('timeupdate', () => {
-        if (this.backgroundMusic[0].currentTime > 95)
-        {
-            this._backgroundMusic('pause');
-        };
-    });
-    this.backgroundMusic.on('loadedmetadata', () => {
-        console.log(this.backgroundMusic[0].duration);
-    });
-    this.backgroundMusic.attr('volume', 0);
-    this.backgroundMusic[0].pause();
-
+    if (this.backgroundMusic == null) 
+    {
+        this.backgroundMusic = $('#bg_music');
+        $('#bg_source').attr('src', BackgroundMusic);
+        this.backgroundMusic[0].pause();
+        this.backgroundMusic[0].load();
+    }
+    
     this.correctSound = new Audio(CorrectSound);
+    this.correctSound.volume = 0.25;
     this.wrongSound = new Audio(WrongSound);
     this.levelUpSound = new Audio(LevelUpSound);
 }
@@ -60,21 +57,19 @@ Game.prototype.init = function() {
 //#region Methoden
 
 Game.prototype.ready = function() {
+    this.backgroundMusic[0].currentTime = 0;
+    this.backgroundMusic[0].play();
     /*
      * setzt Rotation zurück
      */
     globals.canvas.resetRotation();
-    globals.canvas.setBackgroundAlpha(0.55);
+    globals.canvas.setBackgroundAlpha(0.95);
     globals.canvas.setVelocity({x: 0});
     /*
      * zur Startposition
      */
    this.openingAnimation.pause();
    AnimateRocket.start();
-    /*
-     * spielt die Hintergrundmusik
-     */
-   this._backgroundMusic('play');
 }
 
 Game.prototype.start = function() {
@@ -93,12 +88,9 @@ Game.prototype.submit = function(playerAnswer) {
     if (isCorrect)
     {
         this.quizCount++;
-        const score_base = 100;
-        const score_combo = (Math.pow(this.combo, 2) * 100);
-        const score_speed = Math.floor(this.rocketSpeed / 1000) * 125; 
 
-        deltaBoost = 10 + this.combo * 3;
-        deltaScore = score_base + score_combo + score_speed;
+        deltaBoost = (this.combo <= 10) ? 10 + this.combo * 2 : 30;
+        deltaScore = 100 + (this.combo * 100) + this.boostLevel * 200;
         deltaSpeed = 250 + this.combo * 50;
 
         this.correctSound.pause();
@@ -131,8 +123,6 @@ Game.prototype.submit = function(playerAnswer) {
         AnimateUI.correct(); 
         AnimateRocket.flame(this.rocketSpeed);
         AnimateRocket.smoke(0);
-
-        this.showBoost();
         /*
          * färbt das Antwortfeld
          */
@@ -147,7 +137,6 @@ Game.prototype.submit = function(playerAnswer) {
         if ($('#circle').hasClass('_active')) $('#circle').removeClass('_active');
         AnimateUI.wrong();
         AnimateRocket.smoke(.75);
-        this.hideBoost();
     }
     if (this.rocketSpeed > 0 && this.floatingAnimations.length == 0)
     {
@@ -192,41 +181,11 @@ Game.prototype.animateToNextQuiz = function() {
     }, 300);
 }
 
-Game.prototype.getNextQuizMap = function() {
-    /*
-     * holt Information fürs nächste Quiz
-     */
-    if (this.currentQuiz == null) 
-    {
-        this.currentQuiz = new Quiz();
-    }
-    else
-    {
-        this.currentQuiz.next();
-    }
-    return this.currentQuiz.currentMap();
-}
-
-Game.prototype.showBoost = function () {
-    /*
-     * blendet auf dem Antwortfeld in Prozent ein
-     */
-    const baseOpacity = 0.05;
-    const addedOpacity = baseOpacity + (this.boostGauge / 500);
-    $('#boostGauge').fadeTo(300, addedOpacity);
-}
-
-Game.prototype.hideBoost = function () {
-    /*
-     * blendet aus dem Antwortfeld aus
-     */
-    $('#boostGauge').fadeTo(150, 0.0);
-}
-
 Game.prototype.animateOutro = function() {
     /*
      * Outro
-     */ 
+     */
+    globals.canvas.setBackgroundAlpha(0.75); 
     this.floatingAnimations.forEach(anim => anim.pause());
     AnimateRocket.smoke(0);
     AnimateRocket.outroSequence();
@@ -314,7 +273,8 @@ Game.prototype._updateRocketSpeed = function(deltaSpeed) {
     /*
      * aktualisiert die Geschwindigkeit des Hintergrunds
      */
-    console.log(this.rocketSpeed / 1000);
+    if (this.rocketSpeed > 5000) globals.canvas.setBackgroundAlpha(0.75);
+    if (this.rocketSpeed > 10000) globals.canvas.setBackgroundAlpha(0.55);
     globals.canvas.setVelocity({ x: this.rocketSpeed / 1000 });
 }
 
@@ -344,8 +304,8 @@ Game.prototype._updateBoost = function(boostAmount) {
         {
             $('.flame').addClass('_scale6');
         }
-
-        setTimeout(() => this.levelUpSound.play(), 1000);
+        
+        setTimeout(() => this.levelUpSound.play(), 500);
     }
     /*
      * animiert Boost
@@ -362,6 +322,7 @@ Game.prototype._updateProgress = function(percent) {
     const radius = circle.r.baseVal.value;
     const circumference = radius * 2 * Math.PI;
     const offset = circumference - percent / 100 * circumference;
+    
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
     circle.style.strokeDashoffset = offset;
 }

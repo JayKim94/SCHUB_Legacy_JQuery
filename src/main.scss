@@ -124,7 +124,7 @@ div#menu {
         
         .numbers {
             margin-top: 10px;
-            @include glow(transparentize($neon_red, 0.3));
+            color: transparentize($neon_red, 0.3);
             font-size: 2.5rem;
             opacity: 1;
         }
@@ -166,6 +166,9 @@ button {
     }
 }
 
+.blurred {
+    filter: blur(16px);
+}
 /*
  * Quiz
  */
@@ -174,10 +177,6 @@ button {
     opacity: 0;
     color: $text_primary;
     width: fit-content;
-    
-    &.blurred {
-        filter: blur(16px);
-    }
 
     &.cleared {
         opacity: 0.25;
@@ -190,7 +189,10 @@ button {
     &[value="-"] {
         @include glow($primary_pink);
     }
-
+    
+    &[value="÷"] {
+        @include glow($primary_pink);
+    }
       
     &[value="*"] {
         @include glow($primary_yellow); 
@@ -218,6 +220,22 @@ div#dialog {
     .title-text {
         font-size: 8rem;
         color: $text_primary;
+    }
+    .tutorial-text {
+        text-align: center;
+        min-width: 800px;
+        max-width: 50%;
+        font-size: 2rem;
+        margin: 100px 0;
+        color: $text_primary;
+        white-space: pre-line;
+
+        .accent_red {
+            color: $neon_red;
+        }
+        .accent_blue {
+            color: $neon_blue;
+        }
     }
 }
 

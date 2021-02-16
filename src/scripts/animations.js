@@ -230,7 +230,7 @@ export const AnimateUI = {
                 "0px 0px 15px #FDF200",
                 "0px 0px 0px #EFEFEF",
             ],
-            duration: 3500,
+            duration: 2500,
             easing: 'easeOutCirc',
         });
     },
