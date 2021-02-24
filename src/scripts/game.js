@@ -59,7 +59,8 @@ Game.prototype.init = function() {
 
 Game.prototype.ready = function() {
     this.backgroundMusic[0].currentTime = 0;
-    this.backgroundMusic[0].play();
+    console.log(this.backgroundMusic[0].currentTime);
+    this._backgroundMusic('play');
     /*
      * setzt Rotation zurück
      */

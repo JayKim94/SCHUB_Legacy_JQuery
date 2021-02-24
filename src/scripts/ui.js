@@ -440,7 +440,6 @@ UI.prototype._onRetry = function() {
 
     this._showIntroScreen();
     this.game.backgroundMusic[0].pause();
-    this.game.backgroundMusic[0].currentTime = 0;
     this.game.init();
 }
 
@@ -546,7 +545,7 @@ UI.prototype._buildCountdown = function() {
             .text('Musik von "The Cynic Project"')
             .hide()
             .appendTo('#overlay_container')
-            .fadeIn(2500, 'linear', () => $('#attribution').fadeOut(500));
+            .fadeIn(2500, 'linear', () => $('#attribution').fadeOut(500, 'linear', () => $('#attribution').remove()));
     }, DELAY);
     setTimeout(() => { countdown.text('2'); countdown.addClass('_2'); this._playBeep(); }, DELAY * 2);
     setTimeout(() => { countdown.text('1'); countdown.addClass('_1'); this._playBeep(); }, DELAY * 3);
