@@ -78,8 +78,11 @@ div#menu {
     }
 
     p {
-        @include setPosition(50%, 37%);
-        color: transparentize($text_primary, .8);
+        &#developer {
+            @include setPosition(50%, 37%);
+        }
+
+        color: transparentize($text_primary, .65);
         font-size: .9rem;
         text-align: center;
         animation: fadeInFull 10000ms linear;
@@ -175,7 +178,7 @@ button {
  * Quiz
  */
  .op {
-    @include setPosition(50%, 65%);
+    @include setPosition(50%, 62.5%);
     opacity: 0;
     color: $text_primary;
     width: fit-content;

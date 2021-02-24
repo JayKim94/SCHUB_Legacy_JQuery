@@ -42,6 +42,7 @@ Game.prototype.init = function() {
     {
         this.backgroundMusic = $('#bg_music');
         $('#bg_source').attr('src', BackgroundMusic);
+        this.backgroundMusic[0].volume = 0.5;
         this.backgroundMusic[0].pause();
         this.backgroundMusic[0].load();
     }

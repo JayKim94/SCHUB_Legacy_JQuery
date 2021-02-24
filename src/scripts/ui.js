@@ -44,13 +44,14 @@ UI.prototype._showIntroScreen = function() {
      */
     this._widget({ tag: 'div', id: 'menu' })
         .append(this._widget({ tag: 'h1' }).text('SCHUB!'))
-        .append(this._widget({ tag: 'p' }).text('Entwickelt von Jay Kim'))
+        .append(this._widget({ tag: 'p', id: 'developer' }).text('Entwickelt von Jay Kim'))
         .append(this._widget({ tag: 'button', id: 'start' })
             .text('START')
             .on('click', () => this._onClickStart()))
         .append(this._widget({ tag: 'button', id: 'tutorial' })
             .text('TUTORIAL')
             .on('click', () => this._showTutorialScreen()))
+
         .append(this._widget({ tag: 'img', id: 'bibLogo' })
                 .attr('src', LogoImage)
                 .on('click', () => {
@@ -128,6 +129,11 @@ UI.prototype._showInGameScreen = function() {
         .append(this._widget({ tag: 'div', id: 'currentSpeed' })
             .text('0'))
         .appendTo('#overlay_container');
+    this._widget({ tag: 'div', id: 'submitClick', className: 'in_game_ui' })
+        .text('Bestätigen')
+        .on('click', () => this._onSubmit())
+        .hide()
+        .appendTo('#overlay_container');
 }
 
 UI.prototype._showTutorialScreen = function() {
@@ -153,7 +159,9 @@ UI.prototype._showTutorialScreen = function() {
                     `Unsere <span class="accent_red">kleine Rakete</span> braucht etwas Hilfe dabei,
                      sich wieder <span class="accent_blue">auf die Erde</span> zurückzukehren!
                      
-                     Lös die Aufgaben und gib ihr Kraft!`))
+                     Lös die Aufgaben und gib ihr Kraft!
+                     
+                     ( Steuerung: <span class="accent_red">Ziffern</span>, <span class="accent_blue">Eingabetaste</span> )`))
             .append(this._widget({ tag: 'button', className: 'tutorial-button' })
                 .text(`Zurück`)
                 .on('click', () => {
@@ -415,8 +423,9 @@ UI.prototype._onSubmit = function() {
     }
     else 
     {
-        
     }
+
+    $('#submitClick').fadeOut(300);
 }
 
 UI.prototype._onRetry = function() {
@@ -463,17 +472,23 @@ UI.prototype._onKeyDown = function(e) {
     const { key } = e;
     if (this._isValidToWrite(key)) 
     {
-        if (key == '0' && $('#answer').text().length < 1) {
+        if (key == '0' && $('#answer').text().length < 1) 
+        {
             console.log('Null');
-        } else $('#answer').append(key);
+        } else 
+        {
+            $('#answer').append(key);
+        }
         /*
          * blendet aus dem Antwortfeld aus
          */
         $('#boostGauge').fadeTo(150, 0.0);
+        $('#submitClick').fadeTo(150, 0.8);
     }
     else if (this._isSubmit(key)) 
     {
         this._onSubmit();
+        
     }
     else if (this._isClear(key)) 
     {
@@ -493,6 +508,7 @@ UI.prototype._onKeyDown = function(e) {
             const baseOpacity = 0.05;
             const addedOpacity = baseOpacity + (this.game.boostGauge / 500);
             $('#boostGauge').fadeTo(300, addedOpacity);
+            $('#submitClick').fadeOut(300);
         }
     }
 }
@@ -522,7 +538,16 @@ UI.prototype._buildCountdown = function() {
      */
     const DELAY = 1000;
     const countdown = $('#countdown');
-    setTimeout(() => { countdown.text('3').fadeIn(); this._playBeep(); }, DELAY);
+    setTimeout(() => 
+    { 
+        countdown.text('3').fadeIn(); 
+        this._playBeep(); 
+        this._widget({ tag: 'p', id: 'attribution' })
+            .text('Musik von "The Cynic Project"')
+            .hide()
+            .appendTo('#overlay_container')
+            .fadeIn(2500, 'linear', () => $('#attribution').fadeOut(500));
+    }, DELAY);
     setTimeout(() => { countdown.text('2'); countdown.addClass('_2'); this._playBeep(); }, DELAY * 2);
     setTimeout(() => { countdown.text('1'); countdown.addClass('_1'); this._playBeep(); }, DELAY * 3);
     setTimeout(() => 

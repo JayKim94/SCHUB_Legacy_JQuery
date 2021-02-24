@@ -7,9 +7,15 @@ div#overlay_container {
         @include transform(translate(-50%, -50%));
     }
 
+    #attribution {
+        @include setPosition(50%, 62.5%);
+        color: transparentize($text_primary, .75);
+        font-size: 1.25rem;
+    }
+
     /* UI (statisch) */
     div.status {
-        @include setPosition(50%, 65%);
+        @include setPosition(50%, 62.5%);
         z-index: 20;
         white-space: nowrap;
 
@@ -27,6 +33,13 @@ div#overlay_container {
                 font-size: 2rem;
             }
         }
+    }
+    /* TODO */
+    div#submitClick {
+        @include setPosition(50%, 80%);
+        color: $text_primary;
+        font-size: 1.5rem;
+        cursor: pointer;
     }
 
     div#boostLevel {
@@ -58,7 +71,7 @@ div#overlay_container {
 
     div#answer {
         @include glow($text_primary);
-        @include setPosition(50%, 65%);
+        @include setPosition(50%, 62.5%);
         font-size: 8rem;
         width: fit-content;
         text-align: center;
@@ -74,7 +87,7 @@ div#overlay_container {
     }
 
     .progress-ring {
-        @include setPosition(50%, 65%);
+        @include setPosition(50%, 62.5%);
         z-index: 50;
         animation: rotateWithoutScale 10s linear infinite;
 
@@ -89,7 +102,7 @@ div#overlay_container {
     }
 
     div#answer_field {
-        @include setPosition(50%, 65%);
+        @include setPosition(50%, 62.5%);
         display: none;
 
         #combo {
