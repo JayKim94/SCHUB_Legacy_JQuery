@@ -482,7 +482,7 @@ UI.prototype._onKeyDown = function(e) {
          * blendet aus dem Antwortfeld aus
          */
         $('#boostGauge').fadeTo(150, 0.0);
-        $('#submitClick').fadeTo(150, 0.8);
+        $('#submitClick').fadeTo(150, 0.75);
     }
     else if (this._isSubmit(key)) 
     {
